@@ -4,13 +4,13 @@
 
 namespace alg {
 
-QuickFind::QuickFind(int n)  {
+QuickFind::QuickFind(int n) : UnionFind() {
 	int j = {0};
 	std::generate_n(std::back_inserter(m_connectedTo), n, [j] () mutable {return j++;});
 }
 
 
-bool QuickFind::Connected(int p, int q) const {
+bool QuickFind::Connected(int p, int q) {
 	return m_connectedTo[p] == m_connectedTo[q];
 }
 

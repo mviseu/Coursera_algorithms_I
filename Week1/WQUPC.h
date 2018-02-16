@@ -4,15 +4,19 @@
 
 namespace alg {
 
-class QuickFind : public UnionFind {
+class WQUPC : public UnionFind {
 
 public:
-explicit QuickFind(int n);
+explicit WQUPC(int n);
+// path compression prevents Connected from being const
 virtual bool Connected(int p, int q) override final;
 virtual void Union(int p, int q) override final;
 
 private:
+int Root(int p);
+
 std::vector<int> m_connectedTo;
+std::vector<int> m_sizeOfTree;
 
 };
 
