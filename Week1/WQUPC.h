@@ -14,6 +14,7 @@ virtual void Union(int p, int q) override final;
 
 private:
 int Root(int p);
+void ConnectSmallToLarge(int rootSmall, int rootLarge);
 
 std::vector<int> m_connectedTo;
 std::vector<int> m_sizeOfTree;
