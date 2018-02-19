@@ -1,5 +1,6 @@
 #include "Percolation.h"
 #include "RowColumn.h"
+#include "UniqueShuffledInt.h"
 #include "UniformInt.h"
 #include <algorithm>
 #include <iterator>
@@ -134,8 +135,9 @@ bool Percolation::Percolates() const {
 Threshold Percolation::Run() {
 	double thres = 0;
 	const auto nSquare = m_isOpenSite.size();
+	auto us = math::UniformInt(0, nSquare - 1);
 	while(!Percolates()) {
-		const auto rc = RowColumn(math::UniformInt(0, nSquare - 1)(), GetN());
+		const auto rc = RowColumn(us(), GetN());
 		std::cout << "row: " << rc.GetRow1Based() << " column: " << rc.GetColumn1Based() << std::endl;
 		Open(rc.GetRow1Based(), rc.GetColumn1Based());
 		thres = NrOpenSites() / (static_cast<double>(nSquare));
