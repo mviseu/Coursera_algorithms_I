@@ -1,5 +1,6 @@
 #include "Percolation.h"
 #include "RowColumn.h"
+#include "UniformInt.h"
 #include <algorithm>
 #include <iterator>
 #include <stdexcept>
@@ -7,12 +8,12 @@
 #include <vector>
 #include <utility>
 #include <iostream>
+#include <random>
 
 
 namespace perc {
 
 namespace {
-
 int ToZeroBased(int i) {
 	return i - 1;
 }
@@ -94,30 +95,31 @@ Percolation::Percolation(int n)  {
 	if(n <=0) {
 		throw std::out_of_range("n provided to construct percolation grid must be greater than zero");
 	}
-	std::fill_n(std::back_inserter(m_openSites), n*n, false);
+	std::fill_n(std::back_inserter(m_isOpenSite), n*n, false);
 	m_uf = std::make_shared<alg::WQUPC>(alg::WQUPC(n*n + 2));
 }
 
 bool Percolation::IsOpen(int r, int c) const {
 	const auto grid = InitRowColumn(r, c, GetN());
-	return m_openSites[grid.Position1D()];
+	return m_isOpenSite[grid.Position1D()];
 }
 
 void Percolation::Open(int r, int c) {
 	if(!IsOpen(r, c)) {
 		const auto grid = InitRowColumn(r, c, GetN());
-		m_openSites[grid.Position1D()] = true;
+		m_isOpenSite[grid.Position1D()] = true;
+		++m_nrOpenSites;
 		IfUnionVirtual(*m_uf, grid);
-		IfUnionSides(m_openSites, *m_uf, grid);
+		IfUnionSides(m_isOpenSite, *m_uf, grid);
 	}
 }
 
 int Percolation::NrOpenSites() const {
-	return std::count(m_openSites.cbegin(), m_openSites.cend(), true);
+	return m_nrOpenSites;
 }
 
 int Percolation::GetN() const {
-	return std::sqrt(m_openSites.size());
+	return std::sqrt(m_isOpenSite.size());
 }
 
 bool Percolation::IsFull(int r, int c) const {
@@ -127,6 +129,20 @@ bool Percolation::IsFull(int r, int c) const {
 
 bool Percolation::Percolates() const {
 	return m_uf->Connected(VirtualBottomPos(GetN()), VirtualTopPos(GetN()));
+}
+
+Threshold Percolation::Run() {
+	double thres = 0;
+	const auto nSquare = m_isOpenSite.size();
+	while(!Percolates()) {
+		const auto rc = RowColumn(math::UniformInt(0, nSquare - 1)(), GetN());
+		std::cout << "row: " << rc.GetRow1Based() << " column: " << rc.GetColumn1Based() << std::endl;
+		Open(rc.GetRow1Based(), rc.GetColumn1Based());
+		thres = NrOpenSites() / (static_cast<double>(nSquare));
+	}
+	std::cout << "Threshold: 	" << thres << std::endl;
+	return Threshold(thres);
+
 }
 
 } // namespace perc

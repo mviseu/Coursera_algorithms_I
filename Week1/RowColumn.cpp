@@ -21,10 +21,19 @@ void CheckIndex(int index, int max) {
 	}		
 }
 
+int To1Based(int i) {
+	return ++i;
+}
+
 } // namespace
 
 RowColumn::RowColumn(int r, int c, int m) : m_row(r), m_column(c), m_max(m) {
 	CheckRange();
+}
+
+RowColumn::RowColumn(int pos1D, int m) : m_max(m) {
+	m_row = (pos1D + m_max) / m_max - 1;
+	m_column = pos1D - m_row * m_max;
 }
 
 int RowColumn::Position1D() const {
@@ -57,6 +66,14 @@ int RowColumn::GetRow() const {
 
 int RowColumn::GetColumn() const {
 	return m_column;
+}
+
+int RowColumn::GetRow1Based() const {
+	return To1Based(m_row);
+}
+
+int RowColumn::GetColumn1Based() const {
+	return To1Based(m_column);
 }
 
 void RowColumn::CheckRange() const {
