@@ -2,6 +2,9 @@
 #include "RowColumn.h"
 #include "UniqueShuffledInt.h"
 #include "UniformInt.h"
+#include "QuickFind.h"
+#include "WQUPC.h"
+
 #include <algorithm>
 #include <iterator>
 #include <stdexcept>
@@ -10,7 +13,6 @@
 #include <utility>
 #include <iostream>
 #include <random>
-
 
 namespace perc {
 
@@ -138,11 +140,9 @@ Threshold Percolation::Run() {
 	auto us = math::UniformInt(0, nSquare - 1);
 	while(!Percolates()) {
 		const auto rc = RowColumn(us(), GetN());
-		std::cout << "row: " << rc.GetRow1Based() << " column: " << rc.GetColumn1Based() << std::endl;
 		Open(rc.GetRow1Based(), rc.GetColumn1Based());
 		thres = NrOpenSites() / (static_cast<double>(nSquare));
 	}
-	std::cout << "Threshold: 	" << thres << std::endl;
 	return Threshold(thres);
 
 }
