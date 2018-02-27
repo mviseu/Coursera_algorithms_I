@@ -3,7 +3,6 @@
 #include <iostream>
 
 int main() {
-	
 	Stack<int> *stack1 = new StackArray<int>(100);
 	
 	stack1->Push(1);

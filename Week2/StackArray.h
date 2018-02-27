@@ -66,10 +66,13 @@ template <typename T> StackArray<T>& StackArray<T>::operator=(const StackArray& 
 
 
 template <typename T> StackArray<T>& StackArray<T>::operator=(StackArray&& rhs) noexcept {
-	m_capacity = rhs.m_capacity;
-	m_top1Base = rhs.m_top1Base;
-	m_list = rhs.m_list;
-	rhs.m_list = nullptr;
+	if(this != &rhs) {
+		delete[] m_list;
+		m_capacity = rhs.m_capacity;
+		m_top1Base = rhs.m_top1Base;
+		m_list = rhs.m_list;
+		rhs.m_list = nullptr;
+	}
 	return *this;
 }
 
