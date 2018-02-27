@@ -3,10 +3,8 @@
 #include <iostream>
 
 int main() {
-	Stack<int> *stack1 = new StackArray<int>(100);
-	
-	stack1->Push(1);
-	
+	auto stack1 = std::unique_ptr<Stack<int>>(std::make_unique<StackArray<int>>(100).release());
+	stack1->Push(1);	
 	stack1->Push(2);
 	stack1->Push(3);
 	stack1->Push(4);
@@ -22,7 +20,5 @@ int main() {
 		stack1->Pop();
 	}
 
-	delete stack1;
-	
 	return 0;
 }
