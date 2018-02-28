@@ -5,7 +5,7 @@
 template<typename T>
 class StackLinkedList : public Stack<T> {
 public:
-	StackLinkedList(int size = 100);
+	StackLinkedList(int size = 0);
 	StackLinkedList(const StackLinkedList& rhs);
 	StackLinkedList& operator=(const StackLinkedList& rhs);
 	StackLinkedList(StackLinkedList&& rhs) noexcept;
@@ -20,6 +20,7 @@ public:
 
 	virtual ~StackLinkedList();
 private:
+	void CopyStack(const StackLinkedList& rhs);
 	struct Node {
 		T item = T();
 		Node* next = nullptr;
@@ -29,28 +30,52 @@ private:
 
 template <typename T>
 StackLinkedList<T>::StackLinkedList(int size) {
-	top = new Node();
-	for(int j = 0; j < size - 1; ++j) {
-		auto after = top;
+	for(int j = 0; j < size; ++j) {
+		auto old_top = top;
 		top = new Node();
-		top->next = after;
+		top->next = old_top;
 	}
 }
 
-/*
-template <typename T>
-StackLinkedList<T>::StackLinkedList(const StackLinkedList& rhs) {
-	auto j = rhs.top;
-	while(j->next) {j = j->next;}
-	while(j != rhs.top) {Push(j->item);}
+
+template<typename T>
+void StackLinkedList<T>::CopyStack(const StackLinkedList& rhs) {
+	if(!rhs.IsEmpty()) {
+		auto curr = rhs.top;
+		top = new Node{curr->item, nullptr};
+		auto before = top;
+		while((curr = curr->next)) {
+			auto after = new Node{curr->item, nullptr};
+			before->next = after;
+			before = after;
+		}
+	}
 }
-*/
 
 template <typename T>
-StackLinkedList<T>::~StackLinkedList() {
+StackLinkedList<T>::StackLinkedList(const StackLinkedList& rhs) {
+	CopyStack(rhs);
+}
+
+template <typename T>
+StackLinkedList<T>& StackLinkedList<T>::operator=(const StackLinkedList& rhs) {
+	if(this != &rhs) {
+		Reinitialize();
+		CopyStack(rhs);
+	}
+	return *this;
+}
+
+template <typename T>
+void StackLinkedList<T>::Reinitialize() {
 	while(!IsEmpty()) {
 		Pop();
 	}
+}
+
+template <typename T>
+StackLinkedList<T>::~StackLinkedList() {
+	Reinitialize();
 }
 
 template <typename T>

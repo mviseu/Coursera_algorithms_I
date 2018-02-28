@@ -22,7 +22,7 @@ int main() {
 		stack1->Pop();
 	}
 */
-	auto stack1 = std::unique_ptr<Stack<int>>(std::make_unique<StackLinkedList<int>>(100).release());
+	auto stack1 = std::unique_ptr<Stack<int>>(std::make_unique<StackLinkedList<int>>(0).release());
 	stack1->Push(1);	
 	stack1->Push(2);
 	stack1->Push(3);
@@ -32,8 +32,8 @@ int main() {
 	StackLinkedList<int> def;
 	StackLinkedList<int> stack2(def);
 	stack2 = def;
-	StackLinkedList<int> stack3((StackLinkedList<int>()));
-	stack3 = StackLinkedList<int>();
+	//StackLinkedList<int> stack3((StackLinkedList<int>()));
+	//stack3 = StackLinkedList<int>();
 	while(!stack1->IsEmpty()) {
 		std::cout << stack1->Top() << std::endl;
 		stack1->Pop();
