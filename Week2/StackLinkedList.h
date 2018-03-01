@@ -1,6 +1,7 @@
 #pragma once
 #include "Stack.h"
 #include <assert.h>
+#include <iostream>
 
 template<typename T>
 class StackLinkedList : public Stack<T> {
@@ -54,7 +55,19 @@ void StackLinkedList<T>::CopyStack(const StackLinkedList& rhs) {
 
 template <typename T>
 StackLinkedList<T>::StackLinkedList(const StackLinkedList& rhs) {
+	#ifdef DEBUG
+		std::cout << "Copy constructor" << std::endl;
+	#endif
 	CopyStack(rhs);
+}
+
+template <typename T>
+StackLinkedList<T>::StackLinkedList(StackLinkedList&& rhs) noexcept {
+	#ifdef DEBUG
+		std::cout << "Move constructor" << std::endl;
+	#endif
+	top = rhs.top;
+	rhs.top = nullptr;
 }
 
 template <typename T>
@@ -62,6 +75,19 @@ StackLinkedList<T>& StackLinkedList<T>::operator=(const StackLinkedList& rhs) {
 	if(this != &rhs) {
 		Reinitialize();
 		CopyStack(rhs);
+	}
+	return *this;
+}
+
+template <typename T>
+StackLinkedList<T>& StackLinkedList<T>::operator=(StackLinkedList&& rhs) noexcept {
+	#ifdef DEBUG
+		std::cout << "Move assignment" << std::endl;
+	#endif
+	if(this != &rhs) {
+		Reinitialize();
+		top = rhs.top;
+		rhs.top = nullptr;
 	}
 	return *this;
 }
