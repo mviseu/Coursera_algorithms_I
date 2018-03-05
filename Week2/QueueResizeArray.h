@@ -1,24 +1,35 @@
 #pragma once
 #include "Queue.h"
+#include <iostream>
+#include <assert.h>
+
+template <typename T> class QueueResizeArray;
+
+template <typename T>
+std::ostream& operator<<(std::ostream&os, const QueueResizeArray<T>& queue);
+
 
 template <typename T> 
 class QueueResizeArray : public Queue<T> {
+friend std::ostream& operator<< <T>(std::ostream&os, const QueueResizeArray<T>& queue);
 public:
 	QueueResizeArray() = default;
-	QueueResizeArray(const QueueResizeArray&);
+	/*QueueResizeArray(const QueueResizeArray&);
 	QueueResizeArray(QueueResizeArray&&);
 	QueueResizeArray &operator=(const QueueResizeArray&);
 	QueueResizeArray &operator=(QueueResizeArray&&);
-
+	*/
 
 	void Enqueue(const T&) override;
 	void Dequeue() override;
 	bool IsEmpty() const override;
 	bool IsFull() const override;
 	bool IsLastEnd() const;
+	/*
 	T First() const override;
 	T Last() const override;
 	void Reinitialize() override;
+	*/
 
 private:
 	bool IsQuarterFull() const;
@@ -28,6 +39,15 @@ private:
 	int m_last{0}; // 1 based
 	T * m_arr = nullptr;
 };
+
+template <typename T>
+std::ostream& operator<<(std::ostream&os, const QueueResizeArray<T>& queue) {
+	for(auto i = queue.m_first; i < queue.m_first + queue.m_last - queue.m_first; ++i) {
+		os << queue.m_arr[i - 1] << " " ;
+	}
+	os << std::endl;
+	return os;
+}
 
 template <typename T>
 bool QueueResizeArray<T>::IsEmpty() const {
@@ -47,10 +67,10 @@ bool QueueResizeArray<T>::IsLastEnd() const {
 
 template <typename T>
 bool QueueResizeArray<T>::IsQuarterFull() const {
-	return m_last - m_first = 0.25 * m_capacity;
+	return m_last - m_first == 0.25 * m_capacity;
 }
 
-/*
+
 
 template <typename T>
 void QueueResizeArray<T>::Dequeue() {
@@ -58,19 +78,24 @@ void QueueResizeArray<T>::Dequeue() {
 	if(IsQuarterFull()) {
 		m_capacity = m_capacity / 2;
 		auto new_arr = new T[m_capacity]();
-		for(auto i = m_first, j = 0; i < m_last; ++i, ++j) {
-			new_arr[j] = m_arr[m_first - 1];
+		for(auto i = 1; i < m_last - m_first; ++i) {
+			new_arr[i - 1] = m_arr[i + m_first - 1];
 		}
 		delete [] m_arr;
 		m_arr = new_arr;
 		new_arr = nullptr;
-		//m_first = 1;
-		//m_last = m_first + 1;
+		m_last = m_last - m_first;
+		m_first = 1;
 	} else {
 		++m_first;
 	}
+	if(IsEmpty()) {
+		delete [] m_arr;
+		m_arr = nullptr;
+		m_capacity = m_first = m_last = 0;
+	}
 }
-*/
+
 
 template <typename T>
 void QueueResizeArray<T>::Enqueue(const T& elem) {
