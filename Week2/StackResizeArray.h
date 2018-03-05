@@ -19,11 +19,11 @@ public:
 	virtual void Pop() override;
 	virtual void Push(const T&) override;
 	virtual T Top() const override;
-	bool IsQuarterFull() const;
 
 	virtual ~StackResizeArray();
 private:
 	void CopyMembers(const StackResizeArray& rhs);
+	bool IsQuarterFull() const;
 
 	int m_capacity{0};
 	int m_top1Base{0};
