@@ -1,8 +1,10 @@
 #include "Queue.h"
+#include "QueueLinkedList.h"
 #include "QueueResizeArray.h"
 #include <iostream>
 
 int main() {
+	/*
 	QueueResizeArray<int> queue;
 	for(auto i = 0; i < 80000000; ++i) {
 		queue.Enqueue(i);
@@ -17,6 +19,7 @@ int main() {
 	std::cout << queueMove.First() << std::endl;
 	std::cout << queueMove.Last() << std::endl;
 	queueMove.Reinitialize();
+	*/
 	/*
 	for(auto i = 0; i < 800000000; ++i) {
 		queue.Dequeue();
@@ -33,5 +36,21 @@ int main() {
 		queue.Dequeue();
 	}
 	*/
+
+
+	QueueLinkedList<int> queue;
+	for(auto i = 0; i < 80000000; ++i) {
+		queue.Enqueue(i);
+	}
+	for(auto i = 0; i < 80000000; ++i) {
+		queue.Dequeue();
+	}
+	for(auto i = 0; i < 5; ++i) {
+		queue.Enqueue(i);
+	}
+	for(auto i = 0; i < 4; ++i) {
+		queue.Dequeue();
+	}
+
 	return 0;
 }

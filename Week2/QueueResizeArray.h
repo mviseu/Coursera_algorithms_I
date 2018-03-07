@@ -11,8 +11,8 @@ public:
 	QueueResizeArray(const QueueResizeArray&);
 	
 	QueueResizeArray(QueueResizeArray&&) noexcept;
-	QueueResizeArray &operator=(const QueueResizeArray&);
-	QueueResizeArray &operator=(QueueResizeArray&&) noexcept;
+	QueueResizeArray& operator=(const QueueResizeArray&);
+	QueueResizeArray& operator=(QueueResizeArray&&) noexcept;
 
 	void Enqueue(const T&) override;
 	void Dequeue() override;
