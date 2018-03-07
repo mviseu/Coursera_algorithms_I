@@ -51,6 +51,13 @@ int main() {
 	for(auto i = 0; i < 4; ++i) {
 		queue.Dequeue();
 	}
+	auto queueCopy(queue);
+	auto queueMove(std::move(queue));
+	std::cout << "First: " << queueMove.First() << std::endl;
+	std::cout << "Last: " << queueMove.Last() << std::endl;
+
+	queueCopy = queueMove;
+	queueMove = std::move(queueCopy);
 
 	return 0;
 }
