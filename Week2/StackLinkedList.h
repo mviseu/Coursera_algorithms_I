@@ -4,6 +4,12 @@
 #include <iostream>
 
 template<typename T>
+struct Node {
+	T item = T();
+	Node* next = nullptr;
+};
+
+template<typename T>
 class StackLinkedList : public Stack<T> {
 public:
 	StackLinkedList(int size = 0);
@@ -22,18 +28,14 @@ public:
 	virtual ~StackLinkedList();
 private:
 	void CopyStack(const StackLinkedList& rhs);
-	struct Node {
-		T item = T();
-		Node* next = nullptr;
-	};
-	Node* top = nullptr;
+	Node<T>* top = nullptr;
 };
 
 template <typename T>
 StackLinkedList<T>::StackLinkedList(int size) {
 	for(int j = 0; j < size; ++j) {
 		auto old_top = top;
-		top = new Node();
+		top = new Node<T>();
 		top->next = old_top;
 	}
 }
@@ -43,10 +45,10 @@ template<typename T>
 void StackLinkedList<T>::CopyStack(const StackLinkedList& rhs) {
 	if(!rhs.IsEmpty()) {
 		auto curr = rhs.top;
-		top = new Node{curr->item, nullptr};
+		top = new Node<T>{curr->item, nullptr};
 		auto before = top;
 		while((curr = curr->next)) {
-			auto after = new Node{curr->item, nullptr};
+			auto after = new Node<T>{curr->item, nullptr};
 			before->next = after;
 			before = after;
 		}
@@ -117,7 +119,7 @@ bool StackLinkedList<T>::IsFull() const {
 template <typename T>
 void StackLinkedList<T>::Push(const T& elem) {
 	auto oldTop = top;
-	top = new Node{elem, oldTop};
+	top = new Node<T>{elem, oldTop};
 }
 
 template <typename T>

@@ -1,5 +1,6 @@
 #include "StackArray.h"
 #include "StackLinkedList.h"
+#include "StackLinkedListIt.h"
 #include "StackResizeArray.h"
 #include <memory>
 #include <iostream>
@@ -24,7 +25,7 @@ int main() {
 	}
 */
 
-/* 
+
 	auto stack1 = std::unique_ptr<Stack<int>>(std::make_unique<StackLinkedList<int>>(0).release());
 	stack1->Push(1);	
 	stack1->Push(2);
@@ -55,8 +56,9 @@ int main() {
 		std::cout << stack3.Top() << std::endl;
 		stack3.Pop();
 	}
-*/
 
+
+	/*
 	auto stack1 = std::unique_ptr<Stack<int>>(std::make_unique<StackResizeArray<int>>().release());
 	
 	stack1->Push(1);
@@ -85,6 +87,7 @@ int main() {
 		std::cout << stack3.Top() << std::endl;
 		stack3.Pop();
 	}
+	*/
 	return 0;
 
 }
