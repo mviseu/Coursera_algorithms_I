@@ -1,5 +1,6 @@
 #pragma once
 #include "Stack.h"
+#include "StackLinkedListIt.h"
 #include <assert.h>
 #include <iostream>
 
@@ -11,12 +12,17 @@ struct Node {
 
 template<typename T>
 class StackLinkedList : public Stack<T> {
+
+using iterator = StackLinkedListIt<T>;
+using const_iterator = StackLinkedListIt<const T>;
+
 public:
 	StackLinkedList(int size = 0);
 	StackLinkedList(const StackLinkedList& rhs);
 	StackLinkedList& operator=(const StackLinkedList& rhs);
 	StackLinkedList(StackLinkedList&& rhs) noexcept;
 	StackLinkedList& operator=(StackLinkedList&& rhs) noexcept;
+	virtual ~StackLinkedList();
 
 	virtual void Reinitialize() override;
 	virtual bool IsEmpty() const override;
@@ -25,7 +31,9 @@ public:
 	virtual void Push(const T&) override;
 	virtual T Top() const override;
 
-	virtual ~StackLinkedList();
+	//iterator begin() const;
+	//const_iterator cbegin() const;
+
 private:
 	void CopyStack(const StackLinkedList& rhs);
 	Node<T>* top = nullptr;
@@ -135,3 +143,18 @@ T StackLinkedList<T>::Top() const {
 	assert(!IsEmpty());
 	return top->item;
 }
+
+/*
+See how to construct
+
+template <typename T>
+typename StackLinkedList<T>::iterator StackLinkedList<T>::begin() const {
+	return iterator(top);
+}
+
+
+template <typename T>
+typename StackLinkedList<T>::const_iterator StackLinkedList<T>::cbegin() const {
+	return begin();
+}
+*/
