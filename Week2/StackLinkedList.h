@@ -3,6 +3,7 @@
 #include "StackLinkedListIt.h"
 #include <assert.h>
 #include <iostream>
+#include <type_traits>
 
 template<typename T>
 struct Node {
@@ -10,13 +11,13 @@ struct Node {
 	Node* next = nullptr;
 };
 
-template<typename T>
+template<typename T, typename UnqualifiedT = std::remove_cv_t<T>>
 class StackLinkedList : public Stack<T> {
 
-using iterator = StackLinkedListIt<T>;
-using const_iterator = StackLinkedListIt<const T>;
-
 public:
+	using iterator = StackLinkedListIt<T>;
+	using const_iterator = StackLinkedListIt<const T>;
+
 	StackLinkedList(int size = 0);
 	StackLinkedList(const StackLinkedList& rhs);
 	StackLinkedList& operator=(const StackLinkedList& rhs);
@@ -31,16 +32,18 @@ public:
 	virtual void Push(const T&) override;
 	virtual T Top() const override;
 
-	//iterator begin() const;
-	//const_iterator cbegin() const;
+	iterator begin() const;
+	const_iterator cbegin() const;
+	iterator end() const;
+	const_iterator cend() const;
 
 private:
 	void CopyStack(const StackLinkedList& rhs);
-	Node<T>* top = nullptr;
+	Node<UnqualifiedT>* top = nullptr;
 };
 
-template <typename T>
-StackLinkedList<T>::StackLinkedList(int size) {
+template <typename T, typename UnqualifiedT>
+StackLinkedList<T, UnqualifiedT>::StackLinkedList(int size) {
 	for(int j = 0; j < size; ++j) {
 		auto old_top = top;
 		top = new Node<T>();
@@ -49,8 +52,8 @@ StackLinkedList<T>::StackLinkedList(int size) {
 }
 
 
-template<typename T>
-void StackLinkedList<T>::CopyStack(const StackLinkedList& rhs) {
+template<typename T, typename UnqualifiedT>
+void StackLinkedList<T, UnqualifiedT>::CopyStack(const StackLinkedList& rhs) {
 	if(!rhs.IsEmpty()) {
 		auto curr = rhs.top;
 		top = new Node<T>{curr->item, nullptr};
@@ -63,16 +66,16 @@ void StackLinkedList<T>::CopyStack(const StackLinkedList& rhs) {
 	}
 }
 
-template <typename T>
-StackLinkedList<T>::StackLinkedList(const StackLinkedList& rhs) {
+template <typename T, typename UnqualifiedT>
+StackLinkedList<T, UnqualifiedT>::StackLinkedList(const StackLinkedList& rhs) {
 	#ifdef DEBUG
 		std::cout << "Copy constructor" << std::endl;
 	#endif
 	CopyStack(rhs);
 }
 
-template <typename T>
-StackLinkedList<T>::StackLinkedList(StackLinkedList&& rhs) noexcept {
+template <typename T, typename UnqualifiedT>
+StackLinkedList<T, UnqualifiedT>::StackLinkedList(StackLinkedList&& rhs) noexcept {
 	#ifdef DEBUG
 		std::cout << "Move constructor" << std::endl;
 	#endif
@@ -80,8 +83,8 @@ StackLinkedList<T>::StackLinkedList(StackLinkedList&& rhs) noexcept {
 	rhs.top = nullptr;
 }
 
-template <typename T>
-StackLinkedList<T>& StackLinkedList<T>::operator=(const StackLinkedList& rhs) {
+template <typename T, typename UnqualifiedT>
+StackLinkedList<T, UnqualifiedT>& StackLinkedList<T, UnqualifiedT>::operator=(const StackLinkedList& rhs) {
 	if(this != &rhs) {
 		Reinitialize();
 		CopyStack(rhs);
@@ -89,8 +92,8 @@ StackLinkedList<T>& StackLinkedList<T>::operator=(const StackLinkedList& rhs) {
 	return *this;
 }
 
-template <typename T>
-StackLinkedList<T>& StackLinkedList<T>::operator=(StackLinkedList&& rhs) noexcept {
+template <typename T, typename UnqualifiedT>
+StackLinkedList<T, UnqualifiedT>& StackLinkedList<T, UnqualifiedT>::operator=(StackLinkedList&& rhs) noexcept {
 	#ifdef DEBUG
 		std::cout << "Move assignment" << std::endl;
 	#endif
@@ -102,59 +105,64 @@ StackLinkedList<T>& StackLinkedList<T>::operator=(StackLinkedList&& rhs) noexcep
 	return *this;
 }
 
-template <typename T>
-void StackLinkedList<T>::Reinitialize() {
+template <typename T, typename UnqualifiedT>
+void StackLinkedList<T, UnqualifiedT>::Reinitialize() {
 	while(!IsEmpty()) {
 		Pop();
 	}
 }
 
-template <typename T>
-StackLinkedList<T>::~StackLinkedList() {
+template <typename T, typename UnqualifiedT>
+StackLinkedList<T, UnqualifiedT>::~StackLinkedList() {
 	Reinitialize();
 }
 
-template <typename T>
-bool StackLinkedList<T>::IsEmpty() const {
+template <typename T, typename UnqualifiedT>
+bool StackLinkedList<T, UnqualifiedT>::IsEmpty() const {
 	return !top;
 }
 
-template <typename T>
-bool StackLinkedList<T>::IsFull() const {
+template <typename T, typename UnqualifiedT>
+bool StackLinkedList<T, UnqualifiedT>::IsFull() const {
 	return false;
 }
 
-template <typename T>
-void StackLinkedList<T>::Push(const T& elem) {
+template <typename T, typename UnqualifiedT>
+void StackLinkedList<T, UnqualifiedT>::Push(const T& elem) {
 	auto oldTop = top;
 	top = new Node<T>{elem, oldTop};
 }
 
-template <typename T>
-void StackLinkedList<T>::Pop() {
+template <typename T, typename UnqualifiedT>
+void StackLinkedList<T, UnqualifiedT>::Pop() {
 	assert(!IsEmpty());
 	auto newTop = top->next;
 	delete top;
 	top = newTop;
 }
 
-template <typename T>
-T StackLinkedList<T>::Top() const {
+template <typename T, typename UnqualifiedT>
+T StackLinkedList<T, UnqualifiedT>::Top() const {
 	assert(!IsEmpty());
 	return top->item;
 }
 
-/*
-See how to construct
-
-template <typename T>
-typename StackLinkedList<T>::iterator StackLinkedList<T>::begin() const {
-	return iterator(top);
+template <typename T, typename UnqualifiedT>
+typename StackLinkedList<T, UnqualifiedT>::iterator StackLinkedList<T, UnqualifiedT>::begin() const {
+	return StackLinkedListIt<T>(top);
 }
 
-
-template <typename T>
-typename StackLinkedList<T>::const_iterator StackLinkedList<T>::cbegin() const {
+template <typename T, typename UnqualifiedT>
+typename StackLinkedList<T, UnqualifiedT>::const_iterator StackLinkedList<T, UnqualifiedT>::cbegin() const {
 	return begin();
 }
-*/
+
+template <typename T, typename UnqualifiedT>
+typename StackLinkedList<T, UnqualifiedT>::iterator StackLinkedList<T, UnqualifiedT>::end() const {
+	return iterator();
+}
+
+template <typename T, typename UnqualifiedT>
+typename StackLinkedList<T, UnqualifiedT>::const_iterator StackLinkedList<T, UnqualifiedT>::cend() const {
+	return end();
+}

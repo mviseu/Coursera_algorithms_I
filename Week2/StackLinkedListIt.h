@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <iterator>
 #include <type_traits>
+#include <iostream>
 
 template<typename T> struct Node;
 
@@ -17,7 +18,7 @@ class StackLinkedListIt {
 
 friend bool operator== <T>(const StackLinkedListIt<T>& lhs, const StackLinkedListIt<T>& rhs);
 friend bool operator!= <T>(const StackLinkedListIt<T>& lhs, const StackLinkedListIt<T>& rhs);
-friend void swap(StackLinkedListIt<T>& lhs, StackLinkedListIt<T>& rhs);
+friend void swap<T>(StackLinkedListIt<T>& lhs, StackLinkedListIt<T>& rhs) noexcept;
 
 public:
 using difference_type = std::ptrdiff_t;
@@ -26,7 +27,7 @@ using pointer = T*;
 using reference = T&;
 using iterator_category = std::forward_iterator_tag;
 
-
+explicit StackLinkedListIt(Node<UnqualifiedT>* rhs);
 StackLinkedListIt() = default;
 
 T& operator*() const;
@@ -37,8 +38,6 @@ operator StackLinkedListIt<const T>() const;
 
 
 private:
-explicit StackLinkedListIt(Node<UnqualifiedT>* rhs);
-
 Node<UnqualifiedT>* ptr = nullptr;
 };
 
@@ -48,7 +47,7 @@ StackLinkedListIt<T, UnqualifiedT>::StackLinkedListIt(Node<UnqualifiedT>* rhs) :
 
 template<typename T, typename UnqualifiedT>
 T& StackLinkedListIt<T, UnqualifiedT>::operator*() const {
-	assert(!nullptr);
+	assert(ptr);
 	return ptr->item;
 }
 
@@ -59,7 +58,7 @@ T* StackLinkedListIt<T, UnqualifiedT>::operator->() const {
 
 template <typename T, typename UnqualifiedT>
 StackLinkedListIt<T, UnqualifiedT>& StackLinkedListIt<T, UnqualifiedT>::operator++() {
-	assert(!ptr);
+	assert(ptr);
 	ptr = ptr->next;
 	return *this;
 }
