@@ -1,5 +1,7 @@
 #pragma once
+#include "BidirectionalLinkedListIt.h"
 #include <memory>
+#include <type_traits>
 
 template <typename T>
 struct Node {
@@ -10,10 +12,16 @@ std::shared_ptr<Node> prev;
 std::shared_ptr<Node> next;
 };
 
-template <typename T>
+template <typename T, typename UnqualifiedT = typename std::remove_cv<T>::type>
 class BidirectionalLinkedList {
 public:
-BidirectionalLinkedList() = default;
+using iterator = BidirectionalLinkedListIt<T>;
+using const_iterator = BidirectionalLinkedListIt<const T>;
+using reverse_iterator = std::reverse_iterator<iterator>;
+using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+
+BidirectionalLinkedList();
 bool IsEmpty() const;
 int Size() const;
 void PushFront(const T& itm);
@@ -21,76 +29,133 @@ void PushBack(const T& itm);
 void PopFront();
 void PopBack();
 
+iterator begin() const;
+iterator end() const;
+const_iterator cbegin() const;
+const_iterator cend() const;
+reverse_iterator rbegin() const;
+reverse_iterator rend() const;
+const_reverse_iterator crbegin() const;
+const_reverse_iterator crend() const;
+
 private:
 void PopWhenEmpty();
 
 int m_size{0};
-std::shared_ptr<Node<T>> m_front;
-std::shared_ptr<Node<T>> m_back;
+std::shared_ptr<Node<UnqualifiedT>> m_beforeFront = nullptr;
+std::shared_ptr<Node<UnqualifiedT>> m_afterBack = nullptr;
 };
 
-template <typename T>
-bool BidirectionalLinkedList<T>::IsEmpty() const {
+
+template <typename T, typename UnqualifiedT>
+BidirectionalLinkedList<T, UnqualifiedT>::BidirectionalLinkedList() 
+{
+	m_size = 0;
+	m_beforeFront = std::make_shared<Node<T>>(T(), nullptr, nullptr);
+	m_afterBack = std::make_shared<Node<T>>(T(), m_beforeFront, nullptr);
+	m_beforeFront->next = m_afterBack;
+}
+
+template <typename T, typename UnqualifiedT>
+bool BidirectionalLinkedList<T, UnqualifiedT>::IsEmpty() const {
 	return m_size == 0;
 }
 
-template <typename T>
-int BidirectionalLinkedList<T>::Size() const {
+template <typename T, typename UnqualifiedT>
+int BidirectionalLinkedList<T, UnqualifiedT>::Size() const {
 	return m_size;
 }
 
-template <typename T>
-void BidirectionalLinkedList<T>::PushFront(const T& itm) {
-	auto old_front = m_front;
-	m_front = std::make_shared<Node<T>>(itm, nullptr, old_front);
+template <typename T, typename UnqualifiedT>
+void BidirectionalLinkedList<T, UnqualifiedT>::PushFront(const T& itm) {
+	auto newPtr = std::make_shared<Node<T>>(itm, m_beforeFront, m_beforeFront->next);
+	m_beforeFront->next = newPtr;
 	if(IsEmpty()) {
-		m_back = m_front;
+		m_afterBack->prev = newPtr;
 	} else {
-		old_front->prev = m_front;
+		newPtr->next->prev = newPtr;
 	}
 	++m_size;
 }
 
-template <typename T>
-void BidirectionalLinkedList<T>::PushBack(const T& itm) {
-	auto old_back = m_back;
-	m_back = std::make_shared<Node<T>>(itm, old_back, nullptr);
+template <typename T, typename UnqualifiedT>
+void BidirectionalLinkedList<T, UnqualifiedT>::PushBack(const T& itm) {
+	auto newPtr = std::make_shared<Node<T>>(itm, m_afterBack->prev, m_afterBack);
+	m_afterBack->prev = newPtr;
 	if(IsEmpty()) {
-		m_front = m_back;
+		m_beforeFront->next = newPtr;
 	} else {
-		old_back->next = m_back;
+		newPtr->prev->next = newPtr;
 	}
 	++m_size;
 }
 
-template <typename T>
-void BidirectionalLinkedList<T>::PopFront() {
+template <typename T, typename UnqualifiedT>
+void BidirectionalLinkedList<T, UnqualifiedT>::PopFront() {
 	PopWhenEmpty();
 	--m_size;
-	m_front = m_front->next;
-	if(IsEmpty()) {
-		m_back = nullptr;
-	} else {
-		m_front->prev = nullptr;
-	}
+	auto deletedNode = m_beforeFront->next;
+	m_beforeFront->next = m_beforeFront->next->next;
+	m_beforeFront->next->prev = m_beforeFront;
+	deletedNode->next = deletedNode->prev = nullptr;
 }
 
-template <typename T>
-void BidirectionalLinkedList<T>::PopBack() {
+template <typename T, typename UnqualifiedT>
+void BidirectionalLinkedList<T, UnqualifiedT>::PopBack() {
 	PopWhenEmpty();
 	--m_size;
-	m_back = m_back->prev;
-	if(IsEmpty()) {
-		m_front = nullptr;
-	} else {
-		m_back->next = nullptr;
-	}
+	auto deletedNode = m_afterBack->prev;
+	m_afterBack->prev = m_afterBack->prev->prev;
+	m_afterBack->prev->next = m_afterBack;
+	deletedNode->prev = deletedNode->next = nullptr;
 }
 
-template <typename T>
-void BidirectionalLinkedList<T>::PopWhenEmpty() {
+template <typename T, typename UnqualifiedT>
+void BidirectionalLinkedList<T, UnqualifiedT>::PopWhenEmpty() {
 	if(IsEmpty()) {
 		throw std::runtime_error("Cannot pop element if list is empty");
 	}
+}
+
+
+
+template <typename T, typename UnqualifiedT>
+typename BidirectionalLinkedList<T, UnqualifiedT>::iterator BidirectionalLinkedList<T, UnqualifiedT>::begin() const {	
+	return iterator(m_beforeFront->next, m_beforeFront, m_afterBack);
+}
+
+template <typename T, typename UnqualifiedT>
+typename  BidirectionalLinkedList<T, UnqualifiedT>::iterator BidirectionalLinkedList<T, UnqualifiedT>::end() const {
+	return iterator(m_afterBack, m_beforeFront, m_afterBack);
+}
+
+template <typename T, typename UnqualifiedT>
+typename  BidirectionalLinkedList<T, UnqualifiedT>::const_iterator BidirectionalLinkedList<T, UnqualifiedT>::cbegin() const {
+	return begin();
+}
+
+template <typename T, typename UnqualifiedT>
+typename  BidirectionalLinkedList<T, UnqualifiedT>::const_iterator BidirectionalLinkedList<T, UnqualifiedT>::cend() const {
+	return end();
+}
+
+template <typename T, typename UnqualifiedT>
+typename BidirectionalLinkedList<T, UnqualifiedT>::reverse_iterator BidirectionalLinkedList<T, UnqualifiedT>::rbegin() const {
+	return std::reverse_iterator<iterator>(end());
+}
+
+template <typename T, typename UnqualifiedT>
+typename  BidirectionalLinkedList<T, UnqualifiedT>::reverse_iterator BidirectionalLinkedList<T, UnqualifiedT>::rend() const {
+	return std::reverse_iterator<iterator>(begin());
+}
+
+template <typename T, typename UnqualifiedT>
+typename BidirectionalLinkedList<T, UnqualifiedT>::const_reverse_iterator BidirectionalLinkedList<T, UnqualifiedT>::crbegin() const {
+	return rbegin();
+}
+
+template <typename T, typename UnqualifiedT>
+typename  BidirectionalLinkedList<T, UnqualifiedT>::const_reverse_iterator BidirectionalLinkedList<T, UnqualifiedT>::crend() const {
+	return rend();
 }
 
