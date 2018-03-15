@@ -1,5 +1,4 @@
 #include "Vector.h"
-#include "RandomizedQueue.h"
 #include <iostream>
 
 int main() {

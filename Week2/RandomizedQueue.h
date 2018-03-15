@@ -1,8 +1,12 @@
 #pragma once
+#include "RandomIntGenerator.h"
+#include "RandomizedQueueNext.h"
 #include "Vector.h"
-#include <random>
-#include <ctime>
 #include <utility>
+#include <stdexcept>
+#include <iostream>
+
+template <typename T> class RandomizedQueueNext;
 
 template<typename T>
 class RandomizedQueue {
@@ -11,22 +15,14 @@ RandomizedQueue() = default;
 bool IsEmpty() const;
 int Size() const;
 void Enqueue(const T& item);
-//T Dequeue();
+T Dequeue();
+T Sample();
+RandomizedQueueNext<T> CreateNext() const;
 
 private:
+int MaxIndex() const;
 Vector<T> m_queue;
 };
-
-
-namespace {
-int GetRandomInt(int minInclusive, int maxInclusive) {
-	static std::default_random_engine e(std::time(nullptr));
-	static std::uniform_int_distribution<int> ud(minInclusive, maxInclusive);
-	return ud(e);
-}
-
-
-} // namespace
 
 template<typename T>
 bool RandomizedQueue<T>::IsEmpty() const {
@@ -39,20 +35,38 @@ int RandomizedQueue<T>::Size() const {
 }
 
 template<typename T>
+int RandomizedQueue<T>::MaxIndex() const {
+	return Size() - 1;
+}
+
+template<typename T>
 void RandomizedQueue<T>::Enqueue(const T& item) {
 	m_queue.PushBack(item);
 }
 
-/*
+
 template<typename T>
 T RandomizedQueue<T>::Dequeue() {
 	if(IsEmpty()) {
 		std::runtime_error("Attempt to Dequeue an empty RandomizedQueue");
 	}
-	// select a random number between 0, size - 1
-	auto maxIndex = Size() - 1;
-	auto indexOfValToRemove = GetRandomInt(0, maxIndex);
-	std::swap(m_queue[indexOfValToRemove], m_queue[maxIndex]);
-	m_queue.PopBack(item);
+	auto indexOfValToRemove = GetRandomInt(0, MaxIndex());
+	std::swap(m_queue[indexOfValToRemove], m_queue[MaxIndex()]);
+	auto valToRemove = m_queue[MaxIndex()];
+	m_queue.PopBack();
+	return valToRemove;
 }
-*/
+
+template<typename T>
+T RandomizedQueue<T>::Sample() {
+	if(IsEmpty()) {
+		std::runtime_error("Attempt to Sample an empty RandomizedQueue");
+	}
+	auto indexOfValToSample = GetRandomInt(0, MaxIndex());
+	return m_queue[indexOfValToSample];
+}
+
+template<typename T>
+RandomizedQueueNext<T> RandomizedQueue<T>::CreateNext() const {
+	return RandomizedQueueNext(m_queue);
+}
