@@ -3,7 +3,6 @@
 #include <iostream>
 
 void GetOutScope(std::unique_ptr<RandomizedQueueNext<int>> &uniqueNext) {
-	std::cout << "GetScope begin" << std::endl;
 	RandomizedQueue<int> randomQueue;
 	randomQueue.Enqueue(42);
 	randomQueue.Enqueue(3);
@@ -69,6 +68,5 @@ int main() {
 
 	//uptr->Next();
 	//uptr->HasNext();
-
 	return 0;
 }

@@ -19,7 +19,7 @@ void Enqueue(const T& item);
 T Dequeue();
 T Sample();
 RandomizedQueueNext<T> CreateNext() const;
-~RandomizedQueue() {std::cout << "destructor use count: " << m_queue.use_count() << std::endl;}
+~RandomizedQueue() = default;
 
 private:
 int MaxIndex() const;
@@ -29,7 +29,6 @@ std::shared_ptr<Vector<T>> m_queue;
 template<typename T>
 RandomizedQueue<T>::RandomizedQueue() {
 	m_queue = std::make_shared<Vector<T>>();
-	std::cout << "constructor use count: " << m_queue.use_count() << std::endl;
 }
 
 template<typename T>
