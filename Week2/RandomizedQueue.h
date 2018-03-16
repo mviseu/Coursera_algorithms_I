@@ -5,13 +5,14 @@
 #include <utility>
 #include <stdexcept>
 #include <iostream>
+#include <memory>
 
 template <typename T> class RandomizedQueueNext;
 
 template<typename T>
 class RandomizedQueue {
 public:
-RandomizedQueue() = default;
+RandomizedQueue();
 bool IsEmpty() const;
 int Size() const;
 void Enqueue(const T& item);
@@ -21,17 +22,22 @@ RandomizedQueueNext<T> CreateNext() const;
 
 private:
 int MaxIndex() const;
-Vector<T> m_queue;
+std::shared_ptr<Vector<T>> m_queue;
 };
 
 template<typename T>
+RandomizedQueue<T>::RandomizedQueue() {
+	m_queue = std::make_shared<Vector<T>>();
+}
+
+template<typename T>
 bool RandomizedQueue<T>::IsEmpty() const {
-	return m_queue.IsEmpty();
+	return m_queue->IsEmpty();
 }
 
 template<typename T>
 int RandomizedQueue<T>::Size() const {
-	return m_queue.Size();
+	return m_queue->Size();
 }
 
 template<typename T>
@@ -41,7 +47,7 @@ int RandomizedQueue<T>::MaxIndex() const {
 
 template<typename T>
 void RandomizedQueue<T>::Enqueue(const T& item) {
-	m_queue.PushBack(item);
+	m_queue->PushBack(item);
 }
 
 
@@ -51,9 +57,9 @@ T RandomizedQueue<T>::Dequeue() {
 		std::runtime_error("Attempt to Dequeue an empty RandomizedQueue");
 	}
 	auto indexOfValToRemove = GetRandomInt(0, MaxIndex());
-	std::swap(m_queue[indexOfValToRemove], m_queue[MaxIndex()]);
-	auto valToRemove = m_queue[MaxIndex()];
-	m_queue.PopBack();
+	std::swap((*m_queue)[indexOfValToRemove], (*m_queue)[MaxIndex()]);
+	auto valToRemove = (*m_queue)[MaxIndex()];
+	m_queue->PopBack();
 	return valToRemove;
 }
 
@@ -63,7 +69,7 @@ T RandomizedQueue<T>::Sample() {
 		std::runtime_error("Attempt to Sample an empty RandomizedQueue");
 	}
 	auto indexOfValToSample = GetRandomInt(0, MaxIndex());
-	return m_queue[indexOfValToSample];
+	return (*m_queue)[indexOfValToSample];
 }
 
 template<typename T>
