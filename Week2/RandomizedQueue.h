@@ -2,10 +2,10 @@
 #include "RandomIntGenerator.h"
 #include "RandomizedQueueNext.h"
 #include "Vector.h"
-#include <utility>
 #include <stdexcept>
 #include <iostream>
 #include <memory>
+#include <functional>
 
 template <typename T> class RandomizedQueueNext;
 
@@ -76,3 +76,4 @@ template<typename T>
 RandomizedQueueNext<T> RandomizedQueue<T>::CreateNext() const {
 	return RandomizedQueueNext(m_queue);
 }
+

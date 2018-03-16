@@ -2,6 +2,8 @@
 #include "Stack.h"
 #include <assert.h>
 #include <cmath>
+#include <utility>
+#include <functional>
 
 
 template<typename T>
@@ -174,3 +176,17 @@ template <typename T>
 T& Vector<T>::operator[](int i) {
 	return DoSubscript(i);
 }
+
+namespace std {
+	template <typename T> struct hash<Vector<T>> {
+		using argument_type = Vector<T>;
+		using result_type = std::size_t;
+		result_type operator()(const argument_type& vec) const noexcept {
+			result_type ret = 0;
+			for(auto i = 0; i < vec.Size(); ++i) {
+				ret ^= std::hash<T>()(vec[i]) + 0x9e3779b9 + (ret << 6) + (ret >> 2);
+			}
+			return ret;
+		}
+	};
+} // namespace std

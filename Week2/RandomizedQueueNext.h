@@ -1,20 +1,19 @@
 #pragma once
 #include "RandomIntGenerator.h"
 #include "Vector.h"
+#include <functional>
 #include <memory>
 #include <stdexcept>
 #include <utility>
 
 namespace {
 template <typename T>
-
 void ShuffleIndexes(Vector<T>& vec) {
 	for(auto i = 0; i < vec.Size(); ++i) {
 		auto randomIndex = GetRandomInt(0, vec.Size() - 1);
 		std::swap(vec[i], vec[randomIndex]);
 	}
 }
-
 } // namespace
 
 template <typename T> class RandomizedQueue;
@@ -29,18 +28,20 @@ T Next();
 bool HasNext() const;
 
 private:
-void CheckForQueueSizeChange() const;
+void CheckForQueueChange() const;
 void CheckIfNotHasNext() const;
 
 std::shared_ptr<Vector<T>> m_queue; // assignment assumes queue is not changed whilst using Next()
 Vector<int> m_randomIndexes;
 int m_count{0}; // due to requirement on constant worst-case (not amortized)
+std::size_t m_hashNr; // to detect when queue changes so Next, HasNext can fail
+
 };
 
 
 template<typename T> 
 RandomizedQueueNext<T>::RandomizedQueueNext(std::shared_ptr<Vector<T>> queue) 
-: m_queue(queue) {
+: m_queue(queue), m_hashNr(std::hash<Vector<T>>()(*queue)) {
 	// create a shuffled Vector of indexes
 	for(auto i = 0; i < queue->Size(); ++i) {
 		m_randomIndexes.PushBack(i);
@@ -51,7 +52,7 @@ RandomizedQueueNext<T>::RandomizedQueueNext(std::shared_ptr<Vector<T>> queue)
 
 template<typename T>
 T RandomizedQueueNext<T>::Next() {
-	CheckForQueueSizeChange();
+	CheckForQueueChange();
 	CheckIfNotHasNext();
 	auto old_count = m_count;
 	++m_count;
@@ -60,14 +61,14 @@ T RandomizedQueueNext<T>::Next() {
 
 template<typename T>
 bool RandomizedQueueNext<T>::HasNext() const {
-	CheckForQueueSizeChange();
+	CheckForQueueChange();
 	return m_count < m_randomIndexes.Size();
 }
 
 template<typename T>
-void RandomizedQueueNext<T>::CheckForQueueSizeChange() const {
-	if(m_queue->Size() != m_randomIndexes.Size()) {
-		throw std::runtime_error("Change in size of queue detected");
+void RandomizedQueueNext<T>::CheckForQueueChange() const {
+	if(m_hashNr != std::hash<Vector<T>>()(*m_queue)) {
+		throw std::runtime_error("Change queue detected. Cannot use RandomizedQueueNextNext");
 	}
 }
 

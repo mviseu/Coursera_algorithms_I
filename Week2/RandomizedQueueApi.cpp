@@ -8,14 +8,8 @@ int main() {
 	randomQueue.Enqueue(3);
 	randomQueue.Enqueue(1000);
 
-	/*
-	for(auto i = 0; i < 9; ++i) {
-		std::cout << randomQueue.Dequeue() << std::endl;
-	}
-
-	std::cout << randomQueue.Sample() << std::endl;
-	*/
-	/*
+	/*std::cout << randomQueue.Sample() << std::endl;
+	
 	const RandomizedQueue<int> copyRandomQueue(randomQueue);
 	for(auto nexter = copyRandomQueue.CreateNext(); nexter.HasNext(); ) {
 		for(auto independentNexter = copyRandomQueue.CreateNext(); independentNexter.HasNext(); ) {
@@ -24,7 +18,15 @@ int main() {
 		std::cout << nexter.Next() << std::endl;
 	}
 	*/
-	auto nextChange = randomQueue.CreateNext();
+	
+	auto next2 = randomQueue.CreateNext();
+	std::cout << next2.Next() << std::endl;
+	//randomQueue.Dequeue();
+	//randomQueue.Enqueue(5);
+	next2.Next();
+	next2.Next();
+	
+	/*auto nextChange = randomQueue.CreateNext();
 	std::cout << nextChange.Next() << std::endl;
 
 	randomQueue.Enqueue(6);
@@ -33,7 +35,7 @@ int main() {
 	while(nextChange.HasNext()) {
 		std::cout << nextChange.Next() << std::endl;;
 	}
-
+	*/
 
 	return 0;
 }
