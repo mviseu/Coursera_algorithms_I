@@ -5,6 +5,7 @@
 #include <memory>
 #include <stdexcept>
 #include <utility>
+#include <iostream>
 
 namespace {
 template <typename T>
@@ -30,8 +31,9 @@ bool HasNext() const;
 private:
 void CheckForQueueChange() const;
 void CheckIfNotHasNext() const;
+std::shared_ptr<Vector<T>> GetQueue() const;
 
-std::shared_ptr<Vector<T>> m_queue; // assignment assumes queue is not changed whilst using Next()
+std::weak_ptr<Vector<T>> m_queue; // does not control queue lifetime
 Vector<int> m_randomIndexes;
 int m_count{0}; // due to requirement on constant worst-case (not amortized)
 std::size_t m_hashNr; // to detect when queue changes so Next, HasNext can fail
@@ -56,19 +58,22 @@ T RandomizedQueueNext<T>::Next() {
 	CheckIfNotHasNext();
 	auto old_count = m_count;
 	++m_count;
-	return (*m_queue)[m_randomIndexes[old_count]];
+	auto queue = GetQueue();
+	return (*queue)[m_randomIndexes[old_count]];
 }
 
 template<typename T>
 bool RandomizedQueueNext<T>::HasNext() const {
 	CheckForQueueChange();
-	return m_count < m_randomIndexes.Size();
+	auto queue = GetQueue();
+	return m_count < queue->Size();
 }
 
 template<typename T>
 void RandomizedQueueNext<T>::CheckForQueueChange() const {
-	if(m_hashNr != std::hash<Vector<T>>()(*m_queue)) {
-		throw std::runtime_error("Change queue detected. Cannot use RandomizedQueueNextNext");
+	auto queue = GetQueue();
+	if(m_hashNr != std::hash<Vector<T>>()(*queue)) {
+		throw std::runtime_error("Change queue detected. Cannot use RandomizedQueueNext");
 	}
 }
 
@@ -76,5 +81,16 @@ template<typename T>
 void RandomizedQueueNext<T>::CheckIfNotHasNext() const {
 	if(!HasNext()) {
 		throw std::runtime_error("RandomizedQueueNext does not have the next random item!");
+	}
+}
+
+template<typename T>
+std::shared_ptr<Vector<T>> RandomizedQueueNext<T>::GetQueue() const {
+	auto sptr = m_queue.lock();
+	if(sptr) {
+		std::cout << sptr.use_count() << std::endl;
+		return sptr;
+	} else {
+		throw std::runtime_error("Attempt to access a RandomizedQueue that no longer exists");
 	}
 }
