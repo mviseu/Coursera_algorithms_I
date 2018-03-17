@@ -11,7 +11,7 @@ namespace {
 template <typename T>
 void ShuffleIndexes(Vector<T>& vec) {
 	for(auto i = 0; i < vec.Size(); ++i) {
-		auto randomIndex = GetRandomInt(0, vec.Size() - 1);
+		auto randomIndex = GetRandomInt(0, i);
 		std::swap(vec[i], vec[randomIndex]);
 	}
 }
