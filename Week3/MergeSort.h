@@ -23,7 +23,7 @@ void MergeSort(RandomIt beg, RandomIt end) {
 		auto mid = beg + size / 2;
 		MergeSort(beg, mid);
 		MergeSort(mid, end);
-		if(*--mid > *mid) {
+		if(*(mid - 1) > *mid) {
 			MergeAuxiliary(beg, mid, end);
 		}
 	}
