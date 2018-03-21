@@ -1,5 +1,6 @@
 #pragma once
 #include "Merge.h"
+#include "InsertionSort.h"
 #include <algorithm>
 #include <iostream>
 #include <iterator>
@@ -16,10 +17,14 @@ void MergeAuxiliary(RandomIt beg, RandomIt mid, RandomIt end) {
 template <typename RandomIt>
 void MergeSort(RandomIt beg, RandomIt end) {
 	auto size = std::distance(beg, end);
-	auto mid = beg + size / 2;
-	if(size > 2) {
+	if(size < 7) {
+		InsertionSort(beg, end);
+	} else {
+		auto mid = beg + size / 2;
 		MergeSort(beg, mid);
-		MergeSort(mid, end);	
+		MergeSort(mid, end);
+		if(*--mid > *mid) {
+			MergeAuxiliary(beg, mid, end);
+		}
 	}
-	MergeAuxiliary(beg, mid, end);
 }

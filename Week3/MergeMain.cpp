@@ -4,7 +4,7 @@
 #include <iostream>
 
 int main() {
-	std::vector<int> vec = {6, 3, 8, 1, 7, 3, 9, 1};
+	std::vector<int> vec = {6, 3, 8, 1, 7, 3, 9, 1, 42, 1000, 66, 33};
 	std::vector<int> mergedVec;
 	Merge(vec.begin(), vec.begin() + 4, vec.begin() + 4, vec.end(), std::back_inserter(mergedVec));
 
