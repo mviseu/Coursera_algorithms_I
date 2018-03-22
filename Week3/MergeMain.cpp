@@ -20,14 +20,14 @@ int main() {
 		std::cout << elem << std::endl;
 	}
 
-/*
-	std::vector<int> vecBottomUp = {6, 3, 8, 1, 7, 3, 9, 1, 42, 1000, 66, 33, 99, 98, 97};
+
+	std::vector<int> vecBottomUp = {0, 1, 2 , 3, 4, 15, 10, 7, 1};
 	BottomUpMergeSort(vecBottomUp.begin(), vecBottomUp.end());
 	std::cout << "BOTTOM UP MERGE SORT" << std::endl;
 	for(const auto& elem : vecBottomUp) {
 		std::cout << elem << std::endl;
 	}
-*/
+
 	return 0;
 }
 
