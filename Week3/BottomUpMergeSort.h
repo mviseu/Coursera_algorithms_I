@@ -21,19 +21,19 @@ std::vector<Range<RandomIt>> CreateFirstRange(RandomIt beg, RandomIt end) {
 }
 
 
-template<typename RandomIt>
-void MergeAdjacentRanges(typename std::vector<Range<RandomIt>>::const_iterator rangeIt) {
+template<typename RandomIt, typename Compare = std::less<typename RandomIt::value_type>>
+void MergeAdjacentRanges(typename std::vector<Range<RandomIt>>::const_iterator rangeIt, Compare comp = Compare()) {
 	std::vector<typename RandomIt::value_type> out;
-	Merge(rangeIt->beg,rangeIt->end, (rangeIt + 1)->beg, (rangeIt + 1)->end, std::back_inserter(out));
+	Merge(rangeIt->beg,rangeIt->end, (rangeIt + 1)->beg, (rangeIt + 1)->end, std::back_inserter(out), comp);
 	std::copy(out.begin(), out.end(), rangeIt->beg);
 }
 
-template <typename RandomIt>
-std::vector<Range<RandomIt>> MergeAdjacentRanges(const std::vector<Range<RandomIt>>& ranges) {
+template <typename RandomIt, typename Compare = std::less<typename RandomIt::value_type>>
+std::vector<Range<RandomIt>> MergeAdjacentRanges(const std::vector<Range<RandomIt>>& ranges, Compare comp = Compare()) {
 	std::vector<Range<RandomIt>> rangesMerged;
 	for(auto rangeIt = ranges.cbegin(); rangeIt < ranges.cend(); rangeIt += 2) {
 		if(rangeIt != ranges.cend() - 1) {
-			MergeAdjacentRanges<RandomIt>(rangeIt);
+			MergeAdjacentRanges<RandomIt>(rangeIt, comp);
 			rangesMerged.push_back(Range<RandomIt>(rangeIt->beg, (rangeIt+1)->end));
 		} else {
 			rangesMerged.push_back(Range<RandomIt>(rangeIt->beg, rangeIt->end));
@@ -42,11 +42,11 @@ std::vector<Range<RandomIt>> MergeAdjacentRanges(const std::vector<Range<RandomI
 	return rangesMerged;
 }
 
-template <typename RandomIt>
-void BottomUpMergeSort(RandomIt beg, RandomIt end) {
+template <typename RandomIt, typename Compare = std::less<typename RandomIt::value_type>>
+void BottomUpMergeSort(RandomIt beg, RandomIt end, Compare comp = Compare()) {
 	auto ranges = CreateFirstRange(beg, end);
 	while(ranges.size() > 1) {
-		ranges = MergeAdjacentRanges(ranges);
+		ranges = MergeAdjacentRanges(ranges, comp);
 	}
 }
 
