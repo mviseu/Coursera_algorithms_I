@@ -10,10 +10,10 @@ OutputIt Merge(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2,
 		if(first2 == last2) {
 			return std::copy(first1, last1, out);
 		}
-		if(compare(*first1, *first2)) {
-			out = *first1++;
-		} else {
+		if(compare(*first2, *first1)) {
 			out = *first2++;
+		} else {
+			out = *first1++;
 		}
 	}
 	return std::copy(first2, last2, out);
