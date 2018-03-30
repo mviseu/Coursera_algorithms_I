@@ -11,7 +11,9 @@ endif(NOT MSVC)
 add_executable(colinear 
   Draw.cpp
   Draw.h
+  Line2D.cpp
   Line2D.h
+  Point2D.cpp
   Point2D.h
   main.cpp
 )
