@@ -5,7 +5,7 @@
 
 class Draw {
 public:
-	Draw();
+	static Draw& GetDraw();
 	Draw(const Draw&) = delete;
 	Draw(Draw&&) = delete;
 	Draw& operator=(const Draw&) = delete;
@@ -16,5 +16,6 @@ public:
 	bool ShouldWindowClosePoll();
 
 private:
+	Draw();
 	GLFWwindow& m_window;
 };

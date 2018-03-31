@@ -64,6 +64,11 @@ GLFWwindow* CreateWindow() {
 
 } // namespace
 
+Draw& Draw::GetDraw() {
+	static Draw instance;
+	return instance;
+}
+
 Draw::Draw() : m_window(*CreateWindow()) {}
 
 
@@ -76,7 +81,7 @@ bool Draw::ShouldWindowClosePoll() {
 void Draw::AddScaledPoint2D(const Point2D& point) {
 	assert(IsPoint2DScaled(point));
     glBegin(GL_POINTS);
-    glVertex3f(point.x, point.y, 0.0f);
+    CallVertex(point);
     glEnd();	
 }
 

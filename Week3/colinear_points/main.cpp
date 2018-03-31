@@ -3,8 +3,7 @@
 #include <vector>
 
 int main() {
-	Draw window;
-
+	Draw& window = Draw::GetDraw();
 	while (!window.ShouldWindowClosePoll()) {
 		window.AddScaledPoint2D(Point2D(-1, 1));
 		window.AddScaledPoint2D(Point2D(1, 1));
