@@ -1,0 +1,13 @@
+Brute Force Strategy
+Going through all points in different groups of 4
+N⁴
+* Loop 1st i (start i)
+* Loop 2nd j (start i+1)
+* Loop 3rd k (start j+1)
+* Loop 4th l (start k+1)
+
+* check if slope(i, j) == slope(i, k) == slope(i, l)
+* if so -> add to line segment vector vector<LineSegment> as point -> sort 4 points from lower to upper in terms of < (position -> mergeSort)
+* continue looping
+
+No problem: never more than 4 colinear points

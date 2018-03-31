@@ -23,7 +23,7 @@ std::vector<Range<RandomIt>> CreateFirstRange(RandomIt beg, RandomIt end) {
 
 template<typename RandomIt, typename Compare = std::less<typename RandomIt::value_type>>
 void MergeAdjacentRanges(typename std::vector<Range<RandomIt>>::const_iterator rangeIt, Compare comp = Compare()) {
-	std::vector<decltype(*rangeIt)> out;
+	std::vector<typename RandomIt::value_type> out;
 	Merge(rangeIt->beg,rangeIt->end, (rangeIt + 1)->beg, (rangeIt + 1)->end, std::back_inserter(out), comp);
 	std::copy(out.begin(), out.end(), rangeIt->beg);
 }
@@ -33,7 +33,7 @@ std::vector<Range<RandomIt>> MergeAdjacentRanges(const std::vector<Range<RandomI
 	std::vector<Range<RandomIt>> rangesMerged;
 	for(auto rangeIt = ranges.cbegin(); rangeIt < ranges.cend(); rangeIt += 2) {
 		if(rangeIt != ranges.cend() - 1) {
-			MergeAdjacentRanges<RandomIt, Compare>(rangeIt, comp);
+			MergeAdjacentRanges<RandomIt>(rangeIt, comp);
 			rangesMerged.push_back(Range<RandomIt>(rangeIt->beg, (rangeIt+1)->end));
 		} else {
 			rangesMerged.push_back(Range<RandomIt>(rangeIt->beg, rangeIt->end));
@@ -46,7 +46,7 @@ template <typename RandomIt, typename Compare = std::less<typename RandomIt::val
 void BottomUpMergeSort(RandomIt beg, RandomIt end, Compare comp = Compare()) {
 	auto ranges = CreateFirstRange(beg, end);
 	while(ranges.size() > 1) {
-		ranges = MergeAdjacentRanges<RandomIt, Compare>(ranges, comp);
+		ranges = MergeAdjacentRanges(ranges, comp);
 	}
 }
 
