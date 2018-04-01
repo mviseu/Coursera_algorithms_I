@@ -1,5 +1,11 @@
 #include "Group4Points2D.h"
 #include "BottomUpMergeSort.h"
+#include <cassert>
+
+Group4Points2D::Group4Points2D(const std::vector<Point2D>& pointsIn) {
+	assert(m_points.size() == nrPoints);
+	m_points = pointsIn;
+}
 
 bool Group4Points2D::AreCollinear() const {
 	auto firstPoint = m_points[0];

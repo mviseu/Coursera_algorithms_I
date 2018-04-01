@@ -23,6 +23,8 @@ add_executable(collinear
   Merge.h
   Point2D.cpp
   Point2D.h
+  ReadInput.cpp
+  ReadInput.h
   main.cpp
 )
 

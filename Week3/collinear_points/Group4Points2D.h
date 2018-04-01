@@ -8,7 +8,7 @@ constexpr const auto nrPoints = 4;
 
 class Group4Points2D {
 public:
-	Group4Points2D(const std::vector<Point2D>& pointsIn) : m_points(pointsIn) {}
+	Group4Points2D(const std::vector<Point2D>& pointsIn);
 	std::optional<Line2D> GetCollinearLine() const;
 private:
 	bool AreCollinear() const;

@@ -1,20 +1,21 @@
 #include "Point2D.h"
 #include <cassert>
 #include <limits>
+#include <iostream>
 #include <sstream>
 
 namespace {
 
-bool AreBoundsRespected(int i) {
-	const auto lowerBound = 0;
-	const auto upperBound = 32767;
-	assert(i >= lowerBound && i <=upperBound);
+bool AreBoundsRespected(int coord) {
+	const int lowerBound = 0;
+	const int upperBound = 40000;
+	//assert(coord >= lowerBound && coord <= upperBound);
 }
 
 } // namespace
 
 Point2D::Point2D(int xCoord, int yCoord) {
-	assert(AreBoundsRespected(xCoord) && AreBoundsRespected(yCoord));
+	//assert(AreBoundsRespected(xCoord) && AreBoundsRespected(yCoord));
 	x = xCoord;
 	y = yCoord;	
 }
