@@ -3,11 +3,11 @@
 
 struct Point2D {
 	Point2D() = default;
-	Point2D(int xCoord, int yCoord);
+	Point2D(double xCoord, double yCoord);
 	explicit operator std::string() const;
 	double SlopeTo(const Point2D& rhs) const;
-	int x{0};
-	int y{0};
+	double x{0.0};
+	double y{0.0};
 };
 
 bool SlopeOrder(const Point2D& base, const Point2D& lhs, const Point2D& rhs);
@@ -17,3 +17,6 @@ bool operator<(const Point2D& lhs, const Point2D& rhs);
 bool operator>=(const Point2D& lhs, const Point2D& rhs);
 bool operator>(const Point2D& lhs, const Point2D& rhs);
 bool operator<=(const Point2D& lhs, const Point2D& rhs);
+
+Point2D TranslateInBothAxis(const Point2D& point, double translateBy);
+Point2D CompressByInBothAxis(const Point2D& point, double compressBy);

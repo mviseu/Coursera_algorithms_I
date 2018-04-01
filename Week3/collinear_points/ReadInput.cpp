@@ -7,6 +7,14 @@
 
 namespace {
 
+const int upperBound = 32767;
+
+Point2D ScalePointToWindow(const Point2D& point) {
+	const auto scalingFactorWindow = upperBound / 2;
+	const auto translated = TranslateInBothAxis(point, - scalingFactorWindow);
+	return CompressByInBothAxis(translated, scalingFactorWindow);
+}
+
 void SkipNumberOfPoints(std::istream_iterator<int>& fileContents) {
 	++fileContents;
 }
@@ -18,17 +26,14 @@ std::vector<int> ReadAllCoordinates(std::ifstream& file) {
 	std::copy(contents,
 			  std::istream_iterator<int>(),
 			  std::back_inserter(coordinates));
-	for(const auto& coord : coordinates) {
-		std::cout << coord << std::endl;
-	}
 	return coordinates;
 }
 
 std::vector<Point2D> ConstructPoints(const std::vector<int>& coordinates) {
 	std::vector<Point2D> points;
 	for(auto xIt = coordinates.cbegin(); xIt != coordinates.cend(); xIt += 2) {
-		std::cout << "x: " << *xIt << " y: " << *(xIt+1) << std::endl;
-		points.push_back(Point2D(*xIt, *(xIt + 1)));
+		const auto scaledPoint = ScalePointToWindow(Point2D(*xIt, *(xIt + 1)));
+		points.push_back(scaledPoint);
 	}
 	return points;
 }
@@ -40,7 +45,6 @@ std::vector<Point2D> ConstructPoints(const std::vector<int>& coordinates) {
 std::vector<Point2D> ReadInput(const std::string& filename) {
 	std::ifstream file(filename);
 	if(!file) {
-		std::cout << "Failed to open " << filename;
 		return {};
 	}
 	const auto coordinates = ReadAllCoordinates(file);

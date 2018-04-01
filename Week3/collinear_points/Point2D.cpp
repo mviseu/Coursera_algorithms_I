@@ -4,18 +4,8 @@
 #include <iostream>
 #include <sstream>
 
-namespace {
 
-bool AreBoundsRespected(int coord) {
-	const int lowerBound = 0;
-	const int upperBound = 40000;
-	//assert(coord >= lowerBound && coord <= upperBound);
-}
-
-} // namespace
-
-Point2D::Point2D(int xCoord, int yCoord) {
-	//assert(AreBoundsRespected(xCoord) && AreBoundsRespected(yCoord));
+Point2D::Point2D(double xCoord, double yCoord) {
 	x = xCoord;
 	y = yCoord;	
 }
@@ -50,10 +40,8 @@ bool operator!=(const Point2D& lhs, const Point2D& rhs) {
 }
 
 bool operator<(const Point2D& lhs, const Point2D& rhs) {
-	if(lhs.y < rhs.y) {
-		return true;
-	}
-	return lhs.x < rhs.x;
+	return lhs.y < rhs.y || 
+		   (lhs.y == rhs.y && lhs.x < rhs.x);
 }
 
 bool operator>=(const Point2D& lhs, const Point2D& rhs) {
@@ -65,5 +53,13 @@ bool operator>(const Point2D& lhs, const Point2D& rhs) {
 }
 
 bool operator<=(const Point2D& lhs, const Point2D& rhs) {
-	return !(rhs < lhs);
+	return !(lhs > rhs);
+}
+
+Point2D TranslateInBothAxis(const Point2D& point, double translateBy) {
+	return Point2D(point.x + translateBy, point.y + translateBy);
+}
+
+Point2D CompressByInBothAxis(const Point2D& point, double compressBy) {
+	return Point2D(point.x / compressBy, point.y / compressBy);
 }

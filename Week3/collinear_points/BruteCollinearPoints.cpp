@@ -5,9 +5,8 @@
 
 
 BruteCollinearPoints::BruteCollinearPoints(const std::vector<Point2D>& points) {
-	std::vector<Point2D> m_points;
-	std::for_each(points.cbegin(), points.cend(), [&m_points](const Point2D& point) {
-		if(std::find(m_points.cbegin(), m_points.cend(), point) == m_points.cend()) {
+	std::for_each(points.cbegin(), points.cend(), [this](const Point2D& point) {
+		if(std::find(m_points.cbegin(), m_points.cend(), point) != m_points.cend()) {
 			throw std::invalid_argument("Repeated points cannot be supplied as arguments");
 		}
 		m_points.push_back(point);
@@ -27,6 +26,7 @@ std::vector<Line2D> BruteCollinearPoints::Segments() const {
 			}
 		}
 	}
+	return collinearLines;
 }
 
 int BruteCollinearPoints::NumberOfSegments() const {

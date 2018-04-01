@@ -1,5 +1,6 @@
 #include "Draw.h"
 #include <cassert>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 
@@ -10,13 +11,13 @@ const auto windowName = std::string("Colinear points");
 const auto windowDimX = 800;
 const auto windowDimY = 600;
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void key_callback(GLFWwindow* window, int key, int /*scancode*/, int action, int /*mods*/)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
-void error_callback(int error, const char* description) {
+void error_callback(int /*error*/, const char* description) {
 	fprintf(stderr, "Error: %s\n", description);
 }
 
@@ -29,7 +30,7 @@ void DefineSettings(GLFWwindow& window) {
 }
 
 bool IsCoordinateScaled(int coor) {
-	coor <= 1 && coor >= -1;
+	return coor <= 1 && coor >= -1;
 }
 
 bool IsPoint2DScaled(const Point2D& point) {

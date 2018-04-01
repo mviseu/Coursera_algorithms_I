@@ -1,15 +1,24 @@
 #include "Group4Points2D.h"
 #include "BottomUpMergeSort.h"
+#include <iostream>
 #include <cassert>
+#include <cmath>
 
-Group4Points2D::Group4Points2D(const std::vector<Point2D>& pointsIn) {
+namespace {
+bool Near(float expected, float actual, float epsilon = 1E-08) {
+	return std::abs(expected - actual) < epsilon;  
+}
+
+} // namespace
+
+Group4Points2D::Group4Points2D(const std::vector<Point2D>& pointsIn) : m_points(pointsIn) {
 	assert(m_points.size() == nrPoints);
-	m_points = pointsIn;
 }
 
 bool Group4Points2D::AreCollinear() const {
-	auto firstPoint = m_points[0];
-	return firstPoint.SlopeTo(m_points[1]) == firstPoint.SlopeTo(m_points[2]) == firstPoint.SlopeTo(m_points[3]);
+	const auto firstPoint = m_points[0];
+	const auto slope = firstPoint.SlopeTo(m_points[1]);
+	return Near(slope, firstPoint.SlopeTo(m_points[2])) && Near(slope, firstPoint.SlopeTo(m_points[3]));
 }
 
 std::optional<Line2D> Group4Points2D::GetCollinearLine() const {
@@ -17,6 +26,6 @@ std::optional<Line2D> Group4Points2D::GetCollinearLine() const {
 		return std::nullopt;
 	}
 	auto sortedLine = m_points;
-	BottomUpMergeSort<std::vector<Point2D>::iterator>(sortedLine.begin(), sortedLine.end(), std::less<Point2D>());
-	return Line2D(*sortedLine.begin(), *sortedLine.end());
+	BottomUpMergeSort<std::vector<Point2D>::iterator>(sortedLine.begin(), sortedLine.end());
+	return Line2D(sortedLine.front(), sortedLine.back());
 }
