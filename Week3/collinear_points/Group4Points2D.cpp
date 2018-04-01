@@ -5,7 +5,7 @@
 #include <cmath>
 
 namespace {
-bool Near(float expected, float actual, float epsilon = 1E-08) {
+bool Near(float expected, float actual, float epsilon = 1E-016) {
 	return std::abs(expected - actual) < epsilon;  
 }
 

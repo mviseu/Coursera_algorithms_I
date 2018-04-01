@@ -16,7 +16,10 @@ template<typename RandomIt>
 std::vector<Range<RandomIt>> CreateFirstRange(RandomIt beg, RandomIt end) {
 	std::vector<Range<RandomIt>> oneElementRanges;
 	auto it = beg;
-	std::generate_n(std::back_inserter(oneElementRanges), std::distance(beg, end), [&it] () {return Range(it, ++it);});
+	std::generate_n(std::back_inserter(oneElementRanges), std::distance(beg, end), [&it] () {
+	    auto range = Range(it, it+1);
+	    ++it;
+	    return range; });
 	return oneElementRanges;
 }
 
