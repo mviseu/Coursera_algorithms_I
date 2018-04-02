@@ -16,6 +16,8 @@ add_executable(collinear
   BruteCollinearPoints.h
   Draw.cpp
   Draw.h
+  FastCollinearPoints.cpp
+  FastCollinearPoints.h
   Group4Points2D.cpp
   Group4Points2D.h
   Line2D.cpp

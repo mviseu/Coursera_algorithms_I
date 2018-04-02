@@ -1,5 +1,6 @@
 #include "BruteCollinearPoints.h"
 #include "Draw.h"
+#include "FastCollinearPoints.h"
 #include "ReadInput.h"
 #include <algorithm>
 #include <iostream>
@@ -31,7 +32,7 @@ void DrawCollinearSegments(const std::vector<Line2D>& lines, Draw& window) {
 
 int main() {
 	const auto points = ReadPoints();
-	const auto lines = BruteCollinearPoints{points}.Segments();
+	const auto lines = FastCollinearPoints{points}.Segments();
 	Draw& window = Draw::GetDraw();
 	while (!window.ShouldWindowClosePoll()) {
 		DrawPoints(points, window);

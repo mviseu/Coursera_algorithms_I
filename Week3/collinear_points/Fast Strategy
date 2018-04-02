@@ -1,0 +1,8 @@
+Fast Strategy
+
+N2LogN + N2
+For each point p:
+* Sort all other points given slope they make with p (NlogN with merge sort)
+  	* Creates a sorted vector with points
+	* Find all the adjacent points with same slope. Record min/max points according to less than operator, useful for 4 or more points with same slope.
+	* If 4 or more collinear points, add to segments.
