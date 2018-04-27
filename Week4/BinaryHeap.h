@@ -28,7 +28,7 @@ void PopHeap(RandomIt first, RandomIt last, Compare comp = Compare()) {
 		return;
 	}
 	const auto maxNewIt = std::prev(last);
-	const int nrElementsWithoutMax = std::distance(first, maxNewIt);
+	const auto nrElementsWithoutMax = std::distance(first, maxNewIt);
 	std::iter_swap(first, maxNewIt);
 	auto parent = first;
 	while(parent < first + nrElementsWithoutMax / 2) {
@@ -36,7 +36,7 @@ void PopHeap(RandomIt first, RandomIt last, Compare comp = Compare()) {
 		auto child = std::next(beforeChildren);
 		const auto secondChild = std::next(child);
 		if(secondChild != maxNewIt && comp(*child, *secondChild)) {
-			std::advance(child);
+			std::advance(child, 1);
 		}
 		if(comp(*parent, *child)) {
 			std::iter_swap(parent, child);

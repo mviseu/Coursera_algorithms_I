@@ -2,6 +2,7 @@
 #include "BinaryHeap.h"
 #include <functional>
 #include <vector>
+#include <stdexcept>
 
 template <typename T, typename Compare = std::less<T>>
 class PriorityQueue {
@@ -12,8 +13,11 @@ public:
 	}	
 
 	bool Empty() const {return container.empty();}
-	int Size() const {return container.size();}
-	const T& Top() const {return container.front();}
+	size_t Size() const {return container.size();}
+	const T& Top() const {
+		ThrowIfEmpty();
+		return container.front();
+	}
 	void Push(const T& val) {
 		container.push_back(val);
 		PushHeap(container.begin(), container.end(), compare);
@@ -23,11 +27,21 @@ public:
 		PushHeap(container.begin(), container.end(), compare);
 	}
 	void Pop() {
+		ThrowIfEmpty();
 		PopHeap(container.begin(), container.end(), compare);
 		container.pop_back();
 	}
 
 private:
+	void ThrowIfEmpty() const {
+		if(container.empty()) {
+			throw std::runtime_error("PriorityQueue is Empty.");
+		}
+	}
 	Compare compare;
 	std::vector<T> container;
 };
+
+/*
+Add throw exception
+*/
