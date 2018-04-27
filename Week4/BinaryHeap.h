@@ -23,19 +23,17 @@ void PushHeap(RandomIt first, RandomIt last, Compare comp = Compare()) {
 }
 
 template <typename RandomIt, typename Compare = std::less<typename RandomIt::value_type>>
-void PopHeap(RandomIt first, RandomIt last, Compare comp = Compare()) {
+void Sink(RandomIt first, RandomIt last, Compare comp = Compare()) {
 	if(first == last) {
 		return;
 	}
-	const auto maxNewIt = std::prev(last);
-	const auto nrElementsWithoutMax = std::distance(first, maxNewIt);
-	std::iter_swap(first, maxNewIt);
+	const auto nrElements = std::distance(first, last);
 	auto parent = first;
-	while(parent < first + nrElementsWithoutMax / 2) {
+	while(parent < first + nrElements / 2) {
 		const auto beforeChildren = first + 2 * std::distance(first, parent);
 		auto child = std::next(beforeChildren);
 		const auto secondChild = std::next(child);
-		if(secondChild != maxNewIt && comp(*child, *secondChild)) {
+		if(secondChild != last && comp(*child, *secondChild)) {
 			std::advance(child, 1);
 		}
 		if(comp(*parent, *child)) {
@@ -48,13 +46,26 @@ void PopHeap(RandomIt first, RandomIt last, Compare comp = Compare()) {
 }
 
 
+template <typename RandomIt, typename Compare = std::less<typename RandomIt::value_type>>
+void PopHeap(RandomIt first, RandomIt last, Compare comp = Compare()) {
+	if(first == last) {
+		return;
+	}
+	std::iter_swap(first, std::prev(last));
+	Sink(first, std::prev(last), comp);
+}
+
 
 template <typename RandomIt, typename Compare = std::less<typename RandomIt::value_type>>
 void MakeHeap(RandomIt first, RandomIt last, Compare comp = Compare()) {
-	auto heapVec = std::vector<typename RandomIt::value_type>();
-	for(auto it = first; it != last; ++it) {
-		heapVec.push_back(*it);
-		PushHeap(heapVec.begin(), heapVec.end(), comp);
+	if(first == last) {
+		return;
 	}
-	std::copy(heapVec.begin(), heapVec.end(), first);
+	if(std::next(first) == last) {
+		return;
+	}
+	auto treeNode = first + std::distance(first, last) / 2 - 1;
+	while(treeNode >= first) {
+		Sink(treeNode--, last, comp);
+	}
 }
