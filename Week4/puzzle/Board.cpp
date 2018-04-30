@@ -1,10 +1,15 @@
 #include "Board.h"
+#include "CountInversions.h"
 #include <algorithm>
 #include <cmath>
 #include <iterator>
 #include <stdexcept>
 
 namespace {
+
+int BoardSize(const std::vector<int>& board) {
+	return static_cast<int>(std::sqrt(board.size()));
+}
 
 void CheckDimension(int rowOrColumn, int N) {
 	if(rowOrColumn < 0 || rowOrColumn >= N) {
@@ -45,10 +50,43 @@ int GetActualIndex(int indexGoal, const std::vector<int>& board) {
 }
 
 int GetSingleValueManhattan(std::vector<int>::const_iterator itGoal, const std::vector<int>& board) {
-	const auto N = static_cast<int>(std::sqrt(board.size()));
+	const auto N = BoardSize(board);
 	const auto indexGoal = GetIndexFromDistance(board.begin(), itGoal);
 	const auto indexActual = GetActualIndex(indexGoal, board);
 	return GetSingleValueManhattan(indexGoal, indexActual, N);
+}
+
+bool IsNumberOdd(int N) {
+	return N % 2 != 0;
+}
+
+std::vector<int> GetBoardWithNoBlank(const std::vector<int>& board) {
+	auto boardWithNoBlank = std::vector<int>();
+	std::copy_if(board.cbegin(), board.cend(), std::back_inserter(boardWithNoBlank), [](int i) {return i !=0;});
+	return boardWithNoBlank;
+}
+
+int CountBoardInversions(const std::vector<int>& board) {
+	auto boardWithNoBlank = GetBoardWithNoBlank(board);
+	return CountInversions(boardWithNoBlank.cbegin(), boardWithNoBlank.cend());
+}
+
+int AreBoardInversionsOdd(const std::vector<int>& board) {
+	return IsNumberOdd(CountBoardInversions(board));
+}
+
+bool IsOddBoardSolvable(const std::vector<int>& board) {
+	return !AreBoardInversionsOdd(board);
+}
+
+int GetBlankRowIndex(const std::vector<int>& board) {
+	const auto itBlank = std::find(board.cbegin(), board.cend(), 0);
+	return GetRowIndex(GetIndexFromDistance(board.cbegin(), itBlank), BoardSize(board));
+}
+
+bool IsEvenBoardSolvable(const std::vector<int>& board) {
+	const auto blankRowPlusInversions = GetBlankRowIndex(board) + CountBoardInversions(board);
+	return IsNumberOdd(blankRowPlusInversions);
 }
 
 } // namespace
@@ -61,14 +99,14 @@ Board::Board(const std::vector<std::vector<int>>& board) {
 }
 
 int Board::TileAt(int row, int col) const {
-	const auto N = static_cast<int>(Size());
+	const auto N = Size();
 	CheckDimension(row, N);
 	CheckDimension(col, N);
 	return m_board[row * N + col];
 }
 
 int Board::Size() const {
-	return static_cast<int>(std::sqrt(m_board.size()));
+	return BoardSize(m_board);
 }
 
 int Board::Hamming() const {
@@ -89,4 +127,15 @@ int Board::Manhattan() const {
 		manhattan += GetSingleValueManhattan(itGoal, m_board);
 	}
 	return manhattan;
+}
+
+bool Board::IsGoal() const {
+	return Hamming() == 0;
+}
+
+bool Board::IsSolvable() const {
+	if(IsNumberOdd(Size())) {
+		return IsOddBoardSolvable(m_board);
+	}
+	return IsEvenBoardSolvable(m_board);
 }

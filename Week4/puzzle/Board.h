@@ -8,6 +8,8 @@ public:
 	int Size() const;
 	int Hamming() const;
 	int Manhattan() const;
+	bool IsGoal() const;
+	bool IsSolvable() const;
 private:
 	std::vector<int> m_board;
 };
