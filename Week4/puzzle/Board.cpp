@@ -139,3 +139,11 @@ bool Board::IsSolvable() const {
 	}
 	return IsEvenBoardSolvable(m_board);
 }
+
+bool operator==(const Board& lhs, const Board& rhs) {
+	return lhs.m_board == rhs.m_board;
+}
+
+bool operator!=(const Board& lhs, const Board& rhs) {
+	return !(lhs == rhs);
+}

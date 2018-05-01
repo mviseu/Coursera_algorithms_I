@@ -29,8 +29,5 @@ int main() {
 	auto oddNonSolvable = Board(std::vector<std::vector<int>>({{1, 2, 3}, {4, 5, 6}, {8, 7, 0}}));
 	auto oddSolvable = Board(std::vector<std::vector<int>>({{0, 1, 3}, {4, 2, 5}, {7, 8, 6}}));
 	auto evenSolvable = Board(std::vector<std::vector<int>>({{1, 2, 3, 4}, {5, 0, 6, 8}, {9, 10, 7, 11}, {13, 14, 15, 12}}));
-	std::cout << "Is board solvable: " << oddNonSolvable.IsSolvable() << std::endl;
-	std::cout << "Is board solvable: " << oddSolvable.IsSolvable() << std::endl;
-	std::cout << "Is board solvable: " << evenSolvable.IsSolvable() << std::endl;
 	return 0;
 }
