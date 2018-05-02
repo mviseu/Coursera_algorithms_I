@@ -4,8 +4,28 @@
 #include <cmath>
 #include <iterator>
 #include <stdexcept>
+#include <utility>
+#include <iomanip>
 
 namespace {
+enum struct Direction {up, down, left, right};
+
+int GetColumnIndex(int arrayIndex, int N) {
+	return arrayIndex % N;
+}
+
+int GetRowIndex(int arrayIndex, int N) {
+	return arrayIndex / N;
+}
+
+int GetIndex(int row, int col, int N) {
+	return N * row + col;
+}
+
+std::pair<int, int> GetRowColumn(int arrayIndex, int N) {
+	return std::make_pair(GetRowIndex(arrayIndex, N),
+						  GetColumnIndex(arrayIndex, N));
+}
 
 int BoardSize(const std::vector<int>& board) {
 	return static_cast<int>(std::sqrt(board.size()));
@@ -15,15 +35,6 @@ void CheckDimension(int rowOrColumn, int N) {
 	if(rowOrColumn < 0 || rowOrColumn >= N) {
 		throw std::out_of_range("row or column dimensions must be between 0 and N-1.");
 	}
-}
-
-int GetColumnIndex(int arrayIndex, int N) {
-	return arrayIndex % N;
-}
-
-int GetRowIndex(int arrayIndex, int N) {
-	const auto colIndex = GetColumnIndex(arrayIndex, N);
-	return (arrayIndex - colIndex) / N;
 }
 
 int DiffRow(int indexGoal, int indexActual, int N) {
@@ -79,14 +90,87 @@ bool IsOddBoardSolvable(const std::vector<int>& board) {
 	return !AreBoardInversionsOdd(board);
 }
 
-int GetBlankRowIndex(const std::vector<int>& board) {
+int GetBlankArrayIndex(const std::vector<int>& board) {
 	const auto itBlank = std::find(board.cbegin(), board.cend(), 0);
-	return GetRowIndex(GetIndexFromDistance(board.cbegin(), itBlank), BoardSize(board));
+	return GetIndexFromDistance(board.cbegin(), itBlank);
+}
+
+int GetBlankRowIndex(const std::vector<int>& board) {
+	return GetRowIndex(GetBlankArrayIndex(board), BoardSize(board));
 }
 
 bool IsEvenBoardSolvable(const std::vector<int>& board) {
 	const auto blankRowPlusInversions = GetBlankRowIndex(board) + CountBoardInversions(board);
 	return IsNumberOdd(blankRowPlusInversions);
+}
+
+bool IsBlankInTopRow(int indexBlank, int N) {
+	return GetRowIndex(indexBlank, N) == 0;
+}
+
+bool IsBlankInBottomRow(int indexBlank, int N) {
+	return GetRowIndex(indexBlank, N) == N - 1;
+}
+
+bool IsBlankInLeftMostColumn(int indexBlank, int N) {
+	return GetColumnIndex(indexBlank, N) == 0;
+}
+
+bool IsBlankInRightMostColumn(int indexBlank, int N) {
+	return GetColumnIndex(indexBlank, N) == N - 1;
+}
+
+int GetIndexToShiftedPosition(int currIndex, Direction dir, int N) {
+	const auto currRow = GetRowColumn(currIndex, N).first;
+	const auto currCol = GetRowColumn(currIndex, N).second;
+	switch(dir) {
+	case Direction::up:
+		return GetIndex(currRow - 1, currCol, N);
+	case Direction::down:
+		return GetIndex(currRow + 1, currCol, N);
+	case Direction::left:
+		return GetIndex(currRow, currCol - 1, N);
+	case Direction::right:
+		return GetIndex(currRow, currCol + 1, N);
+	default:
+		return GetIndex(currRow, currCol, N);
+	}
+}
+
+Board GetBoard(const std::vector<int>& boardVec) {
+	std::vector<std::vector<int>> boardRet;
+	const auto N = BoardSize(boardVec);
+	auto it = boardVec.begin();
+	while(it != boardVec.end()) {
+		boardRet.push_back(std::vector<int>(it, it + N));
+		std::advance(it, N);
+	}
+	return Board(boardRet);
+}
+
+Board GetBoardWithBlankShifted(int indexBlank, Direction dir, const std::vector<int>& board) {
+	auto newBoard = board;
+	auto beg = newBoard.begin();
+	auto oldBlankIt = beg + indexBlank;
+	auto newBlankIt = beg + GetIndexToShiftedPosition(indexBlank, dir, BoardSize(board));
+	std::iter_swap(oldBlankIt, newBlankIt);
+	return GetBoard(newBoard);
+}
+
+Board GetBoardWithBlankShiftedToLeft(int indexBlank, const std::vector<int>& board) {
+	return GetBoardWithBlankShifted(indexBlank, Direction::left, board);
+}
+
+Board GetBoardWithBlankShiftedToRight(int indexBlank, const std::vector<int>& board) {
+	return GetBoardWithBlankShifted(indexBlank, Direction::right, board);
+}
+
+Board GetBoardWithBlankShiftedUp(int indexBlank, const std::vector<int>& board) {
+	return GetBoardWithBlankShifted(indexBlank, Direction::up, board);
+}
+
+Board GetBoardWithBlankShiftedDown(int indexBlank, const std::vector<int>& board) {
+	return GetBoardWithBlankShifted(indexBlank, Direction::down, board);
 }
 
 } // namespace
@@ -140,10 +224,44 @@ bool Board::IsSolvable() const {
 	return IsEvenBoardSolvable(m_board);
 }
 
+std::vector<Board> Board::Neighbors() const {
+	std::vector<Board> neighbors;
+	const auto blankIndex = GetBlankArrayIndex(m_board);
+	const auto N = Size();
+	if(!IsBlankInLeftMostColumn(blankIndex, N)) {
+		neighbors.push_back(GetBoardWithBlankShiftedToLeft(blankIndex, m_board));
+	}
+	if(!IsBlankInRightMostColumn(blankIndex, N)) {
+		neighbors.push_back(GetBoardWithBlankShiftedToRight(blankIndex, m_board));
+	}
+	if(!IsBlankInTopRow(blankIndex, N)) {
+		neighbors.push_back(GetBoardWithBlankShiftedUp(blankIndex, m_board));
+	}
+	if(!IsBlankInBottomRow(blankIndex, N)) {
+		neighbors.push_back(GetBoardWithBlankShiftedDown(blankIndex, m_board));
+	}
+	return neighbors;
+}
+
 bool operator==(const Board& lhs, const Board& rhs) {
 	return lhs.m_board == rhs.m_board;
 }
 
 bool operator!=(const Board& lhs, const Board& rhs) {
 	return !(lhs == rhs);
+}
+
+std::ostream& operator<<(std::ostream& os, const Board& board) {
+	const auto N = board.Size();
+	std::cout << N;
+	for(auto it = board.m_board.begin(); it != board.m_board.end(); std::advance(it, N)) {
+		os << std::endl;
+		for(auto itInThrees = it; itInThrees != it + N; ++itInThrees) {
+			os << std::internal;
+			os << std::setw(12);
+			os << *itInThrees;
+		}
+	}
+	os << std::right;
+	return os;
 }

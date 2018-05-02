@@ -1,9 +1,16 @@
 #pragma once
+#include <iostream>
 #include <vector>
+
+class Board;
+bool operator==(const Board& lhs, const Board& rhs);
+bool operator!=(const Board& lhs, const Board& rhs);
+std::ostream& operator<<(std::ostream& os, const Board& board);
 
 class Board {
 friend bool operator==(const Board& lhs, const Board& rhs);
 friend bool operator!=(const Board& lhs, const Board& rhs);
+friend std::ostream& operator<<(std::ostream&, const Board&);
 
 public:
 	Board(const std::vector<std::vector<int>>& board);
@@ -13,6 +20,7 @@ public:
 	int Manhattan() const;
 	bool IsGoal() const;
 	bool IsSolvable() const;
+	std::vector<Board> Neighbors() const;
 private:
 	std::vector<int> m_board;
 };
