@@ -49,7 +49,7 @@ int CountInversionsAndMerge(RandomIt beg, RandomIt end) {
 
 template <typename RandomIt>
 int CountInversions(RandomIt beg, RandomIt end) {
-	std::vector<RandomIt::value_type> saveCopy(beg, end);
+	std::vector<typename RandomIt::value_type> saveCopy(beg, end);
 	const auto ret = CountInversionsAndMerge(saveCopy.begin(), saveCopy.end());
 	return ret;
 }

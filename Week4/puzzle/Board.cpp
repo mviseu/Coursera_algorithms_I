@@ -253,7 +253,6 @@ bool operator!=(const Board& lhs, const Board& rhs) {
 
 std::ostream& operator<<(std::ostream& os, const Board& board) {
 	const auto N = board.Size();
-	std::cout << N;
 	for(auto it = board.m_board.begin(); it != board.m_board.end(); std::advance(it, N)) {
 		os << std::endl;
 		for(auto itInThrees = it; itInThrees != it + N; ++itInThrees) {
@@ -264,4 +263,16 @@ std::ostream& operator<<(std::ostream& os, const Board& board) {
 	}
 	os << std::right;
 	return os;
+}
+
+std::istream& operator>>(std::istream& is, Board& board) {
+	int N{0};
+	if(is >> N) {
+		board.m_board = std::vector<int>();
+		std::istream_iterator<int> in(is);
+		std::generate_n(std::back_inserter(board.m_board), N * N, [&in]() {
+			return *in++;}
+		);
+	}
+	return is;
 }
