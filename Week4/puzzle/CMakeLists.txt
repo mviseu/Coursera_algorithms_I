@@ -7,9 +7,18 @@ add_executable(puzzle
   Board.cpp
   Board.h
   CountInversions.h
+  Priority.h
   PriorityQueue.h
   SearchNode.cpp
   SearchNode.h
+  SearchNodeData.cpp
+  SearchNodeData.h
+  SearchNodeFactory.cpp
+  SearchNodeFactory.h
+  SearchNodeHamming.cpp
+  SearchNodeHamming.h
+  SearchNodeManhattan.cpp
+  SearchNodeManhattan.h
   Solver.cpp
   Solver.h
   main.cpp

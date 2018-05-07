@@ -1,11 +1,5 @@
 #include "SearchNode.h"
 
-namespace {
-int GetTotalHammingNumber(const SearchNode& sn) {
-	return sn.movesSoFar + sn.currBoard.Hamming();
-}
-} // namespace
-
-bool GetHammingCompare(const SearchNode& lhs, const SearchNode& rhs) {
-	return GetTotalHammingNumber(lhs) > GetTotalHammingNumber(rhs);
+bool GetPriorityCompare(const SearchNode& lhs, const SearchNode& rhs) {
+	return typeid(lhs) == typeid(rhs) && lhs.GetPriorityCompare(rhs);
 }

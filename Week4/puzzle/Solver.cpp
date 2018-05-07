@@ -1,13 +1,14 @@
 #include "Solver.h"
 #include "SearchNode.h"
+#include "SearchNodeFactory.h"
 #include "PriorityQueue.h"
 #include <stdexcept>
 #include <functional>
 
 namespace {
 
-bool GetHammingComparePtr(std::shared_ptr<SearchNode> lhs, std::shared_ptr<SearchNode> rhs) {
-	return GetHammingCompare(*lhs, *rhs);
+bool GetPriorityComparePtr(std::shared_ptr<SearchNode> lhs, std::shared_ptr<SearchNode> rhs) {
+	return GetPriorityCompare(*lhs, *rhs);
 }
 
 void ThrowIfNotSolvable(const Board& initial) {
@@ -17,11 +18,11 @@ void ThrowIfNotSolvable(const Board& initial) {
 }
 
 void EraseNeighborIfEqualToPrevious(const SearchNode& oldNode, std::vector<Board>& candidates) {
-	if(!(oldNode.prevNode)) {
+	if(!(oldNode.IsThereAPreviousNode())) {
 		return;
 	}
 	const auto sameBoard = std::find_if(candidates.begin(), candidates.end(), [&oldNode](const Board& candidate) {
-		return candidate == (*oldNode.prevNode).currBoard;
+		return oldNode.IsThisThePreviousBoard(candidate);
 	});
 	if(sameBoard != candidates.end()) {
 		candidates.erase(sameBoard);
@@ -31,80 +32,66 @@ void EraseNeighborIfEqualToPrevious(const SearchNode& oldNode, std::vector<Board
 std::vector<std::shared_ptr<SearchNode>> GetNeighborNodes(std::shared_ptr<SearchNode> oldNode, const std::vector<Board>& neighborBoards) {
 	std::vector<std::shared_ptr<SearchNode>> searchNodes;
 	std::transform(neighborBoards.cbegin(), neighborBoards.cend(), std::back_inserter(searchNodes), 
-		[oldNode](const Board& board) {return std::make_shared<SearchNode>(SearchNode(board, oldNode, (*oldNode).movesSoFar + 1));});
+		[oldNode](const Board& board) {return CreateNextSearchNode(board, oldNode);});
 	return searchNodes;
 }
 
-void PushAllNeighbors(const std::vector<std::shared_ptr<SearchNode>>& neighbors, PriorityQueue<std::shared_ptr<SearchNode>, decltype(&GetHammingComparePtr)>& pq) {
+void PushAllNeighbors(const std::vector<std::shared_ptr<SearchNode>>& neighbors, PriorityQueue<std::shared_ptr<SearchNode>, decltype(&GetPriorityComparePtr)>& pq) {
 	std::for_each(neighbors.cbegin(), neighbors.cend(), [&pq] (std::shared_ptr<SearchNode> sn) {return pq.Push(sn);});
 }
 
-void InsertNeighbors(std::shared_ptr<SearchNode> oldNode,  PriorityQueue<std::shared_ptr<SearchNode>, decltype(&GetHammingComparePtr)>& pq) {
-	auto neighborBoards = (*oldNode).currBoard.Neighbors();
+void InsertNeighbors(std::shared_ptr<SearchNode> oldNode,  PriorityQueue<std::shared_ptr<SearchNode>, decltype(&GetPriorityComparePtr)>& pq) {
+	auto neighborBoards = oldNode->GetAllNeighbors();
 	EraseNeighborIfEqualToPrevious(*oldNode, neighborBoards);
 	const auto neighborNodes = GetNeighborNodes(oldNode, neighborBoards);
 	PushAllNeighbors(neighborNodes, pq);
 }
 
-void NextMove(PriorityQueue<std::shared_ptr<SearchNode>, decltype(&GetHammingComparePtr)>& pq) {
+void NextMove(PriorityQueue<std::shared_ptr<SearchNode>, decltype(&GetPriorityComparePtr)>& pq) {
 	auto top = pq.Top();
 	pq.Pop();
 	InsertNeighbors(top, pq);
 }
 
 bool HasGoalBeenReached(const SearchNode& nd) {
-	return nd.currBoard.IsGoal();
+	return nd.HasGoalBeenReached();
 }
 
-void FirstMove(const Board& firstBoard, PriorityQueue<std::shared_ptr<SearchNode>, decltype(&GetHammingComparePtr)>& pq) {
-	auto firstSearch = std::make_shared<SearchNode>(SearchNode(firstBoard, nullptr, 0));
+void FirstMove(const Board& firstBoard, PriorityQueue<std::shared_ptr<SearchNode>, decltype(&GetPriorityComparePtr)>& pq, Priority priority) {
+	auto firstSearch = CreateFirstSearchNode(priority, firstBoard);
 	pq.Push(firstSearch);
 }
 
 std::vector<Board> GetAStarSearchPath(const SearchNode& lastNode) {
-	std::vector<Board> searchPath;
-	auto node = lastNode;
-	while(node.prevNode) {
-		searchPath.push_back(node.currBoard);
-		node = *node.prevNode;
-	}
-	searchPath.push_back(node.currBoard);
-	std::reverse(searchPath.begin(), searchPath.end());
-	return searchPath;
+	return lastNode.GetSequenceOfBoards();
 }
 
 int GetAStarSearchLength(const SearchNode& lastNode) {
-	auto length{0};
-	auto node = lastNode;
-	while(node.prevNode) {
-		++length;
-		node = *node.prevNode;
-	}
-	return length;
+	return lastNode.GetSizeOfNodeChain();
 }
 
-SearchNode Play(const Board& firstBoard) {
-	PriorityQueue<std::shared_ptr<SearchNode>, decltype(&GetHammingComparePtr)> pq(&GetHammingComparePtr);
-	FirstMove(firstBoard, pq);
+std::shared_ptr<SearchNode> Play(const Board& firstBoard, Priority priority) {
+	PriorityQueue<std::shared_ptr<SearchNode>, decltype(&GetPriorityComparePtr)> pq(&GetPriorityComparePtr);
+	FirstMove(firstBoard, pq, priority);
 	auto top =  pq.Top();
 	while(!HasGoalBeenReached(*top)) {
 		NextMove(pq);
 		top = pq.Top();
 	}
-	return *top;
+	return top;
 }
 
 } // namespace
 
-Solver::Solver(const Board& firstBoard) {
+Solver::Solver(const Board& firstBoard, Priority priority) {
 	ThrowIfNotSolvable(firstBoard);
-	goalBoard = Play(firstBoard);
+	goalBoard = Play(firstBoard, priority);
 }
 
 int Solver::Moves() const {
-	return GetAStarSearchLength(goalBoard);
+	return GetAStarSearchLength(*goalBoard);
 }
 
 std::vector<Board> Solver::Solution() const {
-	return GetAStarSearchPath(goalBoard);
+	return GetAStarSearchPath(*goalBoard);
 }

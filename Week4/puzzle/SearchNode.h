@@ -1,13 +1,23 @@
 #pragma once
 #include "Board.h"
 #include <memory>
+#include <vector>
 
 struct SearchNode {
-	SearchNode(const Board& curr, std::shared_ptr<SearchNode> prev, int nrMoves) : currBoard(curr), prevNode(prev), movesSoFar(nrMoves) {}
-	SearchNode() = default;
-	Board currBoard;
-	std::shared_ptr<SearchNode> prevNode;
-	int movesSoFar {0};
+friend bool GetPriorityCompare(const SearchNode& lhs, const SearchNode& rhs);
+public:
+	virtual bool HasGoalBeenReached() const = 0;
+	virtual std::vector<Board> GetAllNeighbors() const = 0;
+	virtual bool IsThereAPreviousNode() const = 0;
+	virtual bool IsThisThePreviousBoard(const Board& board) const = 0;
+	virtual int IncrementNrMoves() const = 0;
+	virtual std::vector<Board> GetSequenceOfBoards() const = 0;
+	virtual int GetSizeOfNodeChain() const = 0;
+	virtual std::shared_ptr<SearchNode> GetPreviousSearchNode() const = 0;
+	virtual Board GetCurrentBoard() const = 0;
+	virtual ~SearchNode() = default;
+private:
+	virtual bool GetPriorityCompare(const SearchNode& rhs) const = 0;
 };
 
-bool GetHammingCompare(const SearchNode& lhs, const SearchNode& rhs);
+bool GetPriorityCompare(const SearchNode& lhs, const SearchNode& rhs);
