@@ -6,7 +6,7 @@
 
 class Solver {
 public:
-	Solver(const Board& firstBoard, Priority priority = Priority::hamming);
+	Solver(const Board& firstBoard, Priority priority = Priority::manhattan);
 	int Moves() const;
 	std::vector<Board> Solution() const;
 private:

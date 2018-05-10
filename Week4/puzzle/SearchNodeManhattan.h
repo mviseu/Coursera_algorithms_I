@@ -6,7 +6,7 @@
 
 struct SearchNodeManhattan : public SearchNode {
 public:
-	SearchNodeManhattan(const SearchNodeData& dt) : data(dt) {}
+	SearchNodeManhattan(const SearchNodeData& dt);
 	SearchNodeManhattan() = default;
 	bool HasGoalBeenReached() const override;
 	std::vector<Board> GetAllNeighbors() const override;
@@ -18,10 +18,10 @@ public:
 	std::shared_ptr<SearchNode> GetPreviousSearchNode() const override;
 	Board GetCurrentBoard() const override;
 	SearchNodeData GetSearchNodeData() const {return data;};
+	int GetCurrentPriority() const {return currPriority;};
 
 private:
 	bool GetPriorityCompare(const SearchNode& rhs) const override;
-
-	int CurrManhattanPriority{0}; // does not count nr moves, only manhattan distances
+	int currPriority = 0; // does not count nr moves, only manhattan distances
 	SearchNodeData data;
 };

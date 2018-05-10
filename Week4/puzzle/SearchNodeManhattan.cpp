@@ -3,10 +3,22 @@
 namespace {
 
 int GetTotalManhattanNumber(const SearchNode& sn) {
-	return sn.GetSizeOfNodeChain() + sn.GetCurrentBoard().Manhattan();
+	const auto manhattanNode = dynamic_cast<const SearchNodeManhattan&>(sn);
+	return sn.GetSizeOfNodeChain() + manhattanNode.GetCurrentPriority();
 }
 
 } // namespace
+
+SearchNodeManhattan::SearchNodeManhattan(const SearchNodeData& dt) : data(dt) {
+	const auto prevNode = dt.GetPreviousSearchNode();
+	if(prevNode != nullptr) {
+		const auto prevSearch = dynamic_cast<const SearchNodeManhattan&>(*prevNode);
+		currPriority = prevSearch.GetCurrentPriority() + GetManhattanDifference(prevSearch.GetCurrentBoard(),
+															  dt.GetCurrentBoard());
+	} else {
+		currPriority = dt.GetCurrentBoard().Manhattan();
+	}
+}
 
 bool SearchNodeManhattan::GetPriorityCompare(const SearchNode& rhs) const {
 	return GetTotalManhattanNumber(*this) > GetTotalManhattanNumber(rhs);

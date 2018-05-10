@@ -276,3 +276,13 @@ std::istream& operator>>(std::istream& is, Board& board) {
 	}
 	return is;
 }
+
+int GetManhattanDifference(const Board& prevBoard, const Board& currBoard) {
+	const auto it = std::find(prevBoard.m_board.cbegin(), prevBoard.m_board.cend(), 0);
+	const auto index = GetIndexFromDistance(prevBoard.m_board.cbegin(), it);
+	const auto changedElement = *(currBoard.m_board.cbegin() + index);
+	const auto goalIndex = changedElement - 1;
+	const auto prevManhattan = GetSingleValueManhattan(prevBoard.m_board.cbegin() + goalIndex, prevBoard.m_board);
+	const auto currManhattan = GetSingleValueManhattan(currBoard.m_board.cbegin() + goalIndex, currBoard.m_board);
+	return currManhattan - prevManhattan;
+}

@@ -13,7 +13,7 @@ friend bool operator==(const Board& lhs, const Board& rhs);
 friend bool operator!=(const Board& lhs, const Board& rhs);
 friend std::ostream& operator<<(std::ostream&, const Board&);
 friend std::istream& operator>>(std::istream& is, Board& board);
-
+friend int GetManhattanDifference(const Board& prevBoard, const Board& currBoard);
 public:
 	Board(const std::vector<std::vector<int>>& board = {{}});
 	int TileAt(int row, int col) const;
@@ -26,3 +26,5 @@ public:
 private:
 	std::vector<int> m_board;
 };
+
+int GetManhattanDifference(const Board& prevBoard, const Board& currBoard);
