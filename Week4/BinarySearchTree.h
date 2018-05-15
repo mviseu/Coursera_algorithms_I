@@ -1,5 +1,6 @@
 #pragma once
 #include "BinarySearchNode.h"
+#include "BinarySearchTreeIt.h"
 #include <functional>
 #include <memory>
 
