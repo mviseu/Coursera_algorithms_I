@@ -5,12 +5,14 @@
 template <typename Key, typename T>
 struct Node {
 	Node(const std::pair<Key, T>& val) : value(val) {}
+	Node(const std::pair<Key, T>& val, int sz, std::shared_ptr<Node> prt, std::shared_ptr<Node> lt, std::shared_ptr<Node> rt)
+	: value(val), size(sz), parent(prt), left(lt), right(rt) {}
 	Node() = default;
 	std::pair<Key, T> value;
-	int size{1};
-	std::shared_ptr<Node> parent;
-	std::shared_ptr<Node> left;
-	std::shared_ptr<Node> right;
+	int size{0};
+	std::shared_ptr<Node> parent = nullptr;
+	std::shared_ptr<Node> left = nullptr;
+	std::shared_ptr<Node> right = nullptr;
 };
 
 template <typename Key, typename T>

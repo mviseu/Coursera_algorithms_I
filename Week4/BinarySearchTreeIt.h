@@ -34,6 +34,7 @@ public:
 private:
 	std::shared_ptr<Node<Key, T>> MaxNode() const;
 	std::shared_ptr<Node<Key, T>> MinNode() const;
+
 	std::shared_ptr<Node<Key, T>> iter;
 	std::shared_ptr<Node<Key, T>> beforeMin;
 	std::shared_ptr<Node<Key, T>> afterMax;
@@ -68,7 +69,7 @@ template <typename Key, typename T>
 BinarySearchTreeIt<Key, T>& BinarySearchTreeIt<Key, T>::operator++() {
 	assert(iter != afterMax);
 	if(iter->right != nullptr && iter->right != afterMax) {
-		iter = iter->right.MinNode();
+		iter = BinarySearchTreeIt<Key, T>(iter->right, beforeMin, afterMax).MinNode();
 	} else {
 		while(IsParentLeftOfNode(*iter)) {
 			iter = iter->parent;
@@ -95,7 +96,7 @@ template <typename Key, typename T>
 BinarySearchTreeIt<Key, T>& BinarySearchTreeIt<Key, T>::operator--() {
 	assert(iter != beforeMin);
 	if(iter->left != nullptr && iter->left != beforeMin) {
-		iter = iter->left.MaxNode();
+		iter = BinarySearchTreeIt<Key, T>(iter->left, beforeMin, afterMax).MaxNode();
 	} else {
 		while(IsParentRightOfNode(*iter)) {
 			iter = iter->parent;
@@ -137,7 +138,7 @@ bool operator==(const BinarySearchTreeIt<Key, T>& lhs, const BinarySearchTreeIt<
 
 template <typename Key, typename T>
 bool operator!=(const BinarySearchTreeIt<Key, T>& lhs, const BinarySearchTreeIt<Key, T>& rhs) {
-	!(lhs == rhs);
+	return !(lhs == rhs);
 }
 
 template <typename Key, typename T>
