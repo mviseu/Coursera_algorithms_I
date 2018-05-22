@@ -4,6 +4,7 @@
 #include <functional>
 #include <memory>
 #include <utility>
+#include <iostream>
 
 namespace {
 
@@ -30,7 +31,6 @@ std::pair<std::shared_ptr<Node<Key, T>>, bool> InsertAux(std::shared_ptr<Node<Ke
 								     std::shared_ptr<Node<Key, T>> beforeMin,
 								     std::shared_ptr<Node<Key, T>> afterMax,
 								     const std::pair<Key, T>& val) {
-
 	if(root == nullptr) {
 		root = std::make_shared<Node<Key, T>>(val, 1, parent, nullptr, nullptr);
 		return std::make_pair(root, true);
@@ -48,7 +48,7 @@ std::pair<std::shared_ptr<Node<Key, T>>, bool> InsertAux(std::shared_ptr<Node<Ke
 	if(val.first == root->value.first) {
 		return std::make_pair(root, false);
 	}
-	std::pair<std::shared_ptr<Node<Key, T>>, bool>  insertPair = std::make_pair(nullptr, false);
+	std::pair<std::shared_ptr<Node<Key, T>>, bool> insertPair = std::make_pair(nullptr, false);
 	if(val.first < root->value.first) {
 		insertPair = InsertAux(root, root->left, beforeMin, afterMax, val);
 		root->left = insertPair.first;
@@ -57,8 +57,16 @@ std::pair<std::shared_ptr<Node<Key, T>>, bool> InsertAux(std::shared_ptr<Node<Ke
 		insertPair = InsertAux(root, root->right, beforeMin, afterMax, val);
 		root->right = insertPair.first;
 	}
-	root->size = 1 + root->right->size + root->left->size;
+	root->size = 1;
+	if(root->left != nullptr) {
+		root->size += root->left->size;
+	}
+	if(root->right != nullptr) {
+		root->size += root->right->size;
+	}
+
 	return std::make_pair(root, insertPair.second);
+
 }
 
 } // namespace
