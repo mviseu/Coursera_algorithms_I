@@ -1,71 +1,72 @@
 #pragma once
 #include "BinarySearchNode.h"
+#include "BinarySearchNodes.h"
 #include "BinarySearchTreeIt.h"
 #include <functional>
 #include <memory>
 #include <utility>
 #include <iostream>
+#include <optional>
 
 namespace {
 
 template <typename Key, typename T>
-std::shared_ptr<Node<Key, T>> FindAux(std::shared_ptr<Node<Key, T>> root, 
-								   std::shared_ptr<Node<Key, T>> beforeMin,
-								   std::shared_ptr<Node<Key, T>> afterMax,
-								   const std::pair<Key, T>& val) {
-	if(root == nullptr || root == beforeMin || root == afterMax) {
-		return afterMax;
+std::shared_ptr<Node<Key, T>> FindAux(const Nodes<Key, T>& nodes,
+								   	  const std::pair<Key, T>& val) {
+	if(!DoesRootHaveKey(nodes)) {
+		return nodes.afterMax;
 	}
-	if(val.first == root->value.first) {
-		return root;
+	if(val.first == nodes.root->value.first) {
+		return nodes.root;
 	}
-	if(val.first < root->value.first) {
-		return FindAux(root->left, beforeMin, afterMax, val);
+	if(val.first < nodes.root->value.first) {
+		return FindAux(GetLeftNodes(nodes), val);
 	}
-	return FindAux(root->right, beforeMin, afterMax, val);
+	return FindAux(GetRightNodes(nodes), val);
 }
 
 template <typename Key, typename T>
+std::optional<std::pair<std::shared_ptr<Node<Key, T>>, bool>>
+InsertIfFinalNode(std::shared_ptr<Node<Key, T>> parent, Nodes<Key, T> nodes, const std::pair<Key, T>& val) {
+	if(nodes.root == nullptr) {
+		nodes.root = std::make_shared<Node<Key, T>>(val, 1, parent, nullptr, nullptr);
+		return std::make_pair(nodes.root, true);
+	}
+	if(IsRootTheBeforeMin(nodes)) {
+		nodes.root = std::make_shared<Node<Key, T>>(val, 1, parent, nodes.beforeMin, nullptr);
+		LinkBeforeMinParentToRoot(nodes);
+		return std::make_pair(nodes.root, true);
+	}
+	if(IsRootTheAfterMax(nodes)) {
+		nodes.root = std::make_shared<Node<Key, T>>(val, 1, parent, nullptr, nodes.afterMax);
+		LinkAfterMaxParentToRoot(nodes);
+		return std::make_pair(nodes.root, true);
+	}
+	if(val.first == nodes.root->value.first) {
+		return std::make_pair(nodes.root, false);
+	}
+	return std::nullopt;
+}
+
+
+template <typename Key, typename T>
 std::pair<std::shared_ptr<Node<Key, T>>, bool> InsertAux(std::shared_ptr<Node<Key, T>> parent,
-									 std::shared_ptr<Node<Key, T>> root, 
-								     std::shared_ptr<Node<Key, T>> beforeMin,
-								     std::shared_ptr<Node<Key, T>> afterMax,
-								     const std::pair<Key, T>& val) {
-	if(root == nullptr) {
-		root = std::make_shared<Node<Key, T>>(val, 1, parent, nullptr, nullptr);
-		return std::make_pair(root, true);
-	}
-	if(root == beforeMin) {
-		root = std::make_shared<Node<Key, T>>(val, 1, parent, beforeMin, nullptr);
-		beforeMin->parent = root;
-		return std::make_pair(root, true);
-	}
-	if(root == afterMax) {
-		root = std::make_shared<Node<Key, T>>(val, 1, parent, nullptr, afterMax);
-		afterMax->parent = root;
-		return std::make_pair(root, true);
-	}
-	if(val.first == root->value.first) {
-		return std::make_pair(root, false);
+									 					 Nodes<Key, T> nodes,
+								     					 const std::pair<Key, T>& val) {
+	if(const auto newInsert = InsertIfFinalNode(parent, nodes, val)) {
+		return *newInsert;
 	}
 	std::pair<std::shared_ptr<Node<Key, T>>, bool> insertPair = std::make_pair(nullptr, false);
-	if(val.first < root->value.first) {
-		insertPair = InsertAux(root, root->left, beforeMin, afterMax, val);
-		root->left = insertPair.first;
+	if(val.first < nodes.root->value.first) {
+		insertPair = InsertAux(nodes.root, GetLeftNodes(nodes), val);
+		nodes.root->left = insertPair.first;
 	}
-	if(val.first > root->value.first) {
-		insertPair = InsertAux(root, root->right, beforeMin, afterMax, val);
-		root->right = insertPair.first;
+	if(val.first > nodes.root->value.first) {
+		insertPair = InsertAux(nodes.root, GetRightNodes(nodes), val);
+		nodes.root->right = insertPair.first;
 	}
-	root->size = 1;
-	if(root->left != nullptr) {
-		root->size += root->left->size;
-	}
-	if(root->right != nullptr) {
-		root->size += root->right->size;
-	}
-
-	return std::make_pair(root, insertPair.second);
+	nodes.root->size = GetSizeBasedOnChildren(*nodes.root);
+	return std::make_pair(nodes.root, insertPair.second);
 
 }
 
@@ -76,7 +77,7 @@ class BinarySearchTree {
 public:
 	using iterator = BinarySearchTreeIt<Key, T>;
 	using value_type = std::pair<Key, T>;
-	BinarySearchTree();
+	BinarySearchTree() = default;
 	iterator Find(const value_type& val); // see how to get const_iterator
 	std::pair<iterator, bool> Insert(const value_type& val);
 	bool Empty() const;
@@ -84,52 +85,47 @@ public:
 	iterator End() const;
 
 private:
-	std::shared_ptr<Node<Key, T>> root = nullptr; // firstInserted
-	std::shared_ptr<Node<Key, T>> beforeMin = nullptr;
-	std::shared_ptr<Node<Key, T>> afterMax = nullptr;
+	Nodes<Key, T> nodes;
 };
-
-
-template <typename Key, typename T>
-BinarySearchTree<Key, T>::BinarySearchTree()
-{
-	beforeMin = std::make_shared<Node<Key, T>>(Node<Key, T>(value_type()));
-	afterMax = std::make_shared<Node<Key, T>>(Node<Key, T>(value_type()));
-}
-
 
 template <typename Key, typename T>
 bool BinarySearchTree<Key, T>::Empty() const {
-	return root == nullptr;
+	return nodes.root == nullptr;
 }
 
 template<typename Key, typename T>
 typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::Find(const value_type& val) {
-	auto findNode = FindAux(root, beforeMin, afterMax, val);
-	return BinarySearchTreeIt<Key, T>(findNode, beforeMin, afterMax);
+	auto findNode = FindAux(nodes, val);
+	return BinarySearchTreeIt<Key, T>(findNode, nodes.beforeMin, nodes.afterMax);
 
 }
 
 template<typename Key, typename T>
 std::pair<typename BinarySearchTree<Key, T>::iterator, bool> BinarySearchTree<Key, T>::Insert(const value_type& val) {
 	if(Empty()) {
-		root = std::make_shared<Node<Key, T>>(val, 1, nullptr, beforeMin, afterMax);
-		beforeMin->parent = root;
-		afterMax->parent = root;
+		nodes.root = std::make_shared<Node<Key, T>>(val, 1, nullptr, nodes.beforeMin, nodes.afterMax);
+		nodes.beforeMin->parent = nodes.root;
+		nodes.afterMax->parent = nodes.root;
 		return std::make_pair(Find(val), true);
 	}
-	auto insertPair = InsertAux(root->parent, root, beforeMin, afterMax, val);
+	auto insertPair = InsertAux(nodes.root->parent, nodes, val);
 	return std::make_pair(Find(val), insertPair.second);
 
 }
 
 template <typename Key, typename T>
 typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::Begin() const {
-	return BinarySearchTreeIt<Key, T>(beforeMin->parent, beforeMin, afterMax);
+	return BinarySearchTreeIt<Key, T>(nodes.beforeMin->parent, nodes.beforeMin, nodes.afterMax);
 }
 
 template <typename Key, typename T>
 typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::End() const {
-	return BinarySearchTreeIt<Key, T>(afterMax, beforeMin, afterMax);
+	return BinarySearchTreeIt<Key, T>(nodes.afterMax, nodes.beforeMin, nodes.afterMax);
 }
 
+/*
+To do refactor - insert recursive function
+To do - have non-const and a const version of find
+To do iterator - const/non const versions
+To do - progress with ordered op: mix, max, ceiling, floor, iteration?
+*/

@@ -36,4 +36,17 @@ bool DoesParentExist(const Node<Key, T>& node) {
 	return node.parent != nullptr;
 }
 
+template <typename Key, typename T>
+int GetSizeBasedOnChildren(const Node<Key, T>& node) {
+	auto sz = 1;
+	if(node.left != nullptr) {
+		sz += node.left->size;
+	}
+	if(node.right != nullptr) {
+		sz += node.right->size;
+	}
+	return sz;
+
+}
+
 
