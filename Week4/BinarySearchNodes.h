@@ -18,12 +18,32 @@ struct Nodes {
 
 template<typename Key, typename T>
 Nodes<Key, T> GetLeftNodes(const Nodes<Key, T>& nodes) {
+	// nodes must not have null root
 	return Nodes<Key, T>(nodes.root->left, nodes.beforeMin, nodes.afterMax);
 }
 
 template<typename Key, typename T>
 Nodes<Key, T> GetRightNodes(const Nodes<Key, T>& nodes) {
+	// nodes must not have null root
 	return Nodes<Key, T>(nodes.root->right, nodes.beforeMin, nodes.afterMax);
+}
+
+template<typename Key, typename T>
+Nodes<Key, T> GetAfterMaxNodes(const Nodes<Key, T>& nodes) {
+	// nodes must not have null root
+	return Nodes<Key, T>(nodes.afterMax, nodes.beforeMin, nodes.afterMax);
+}
+
+template<typename Key, typename T>
+Nodes<Key, T> GetBeforeMinNodes(const Nodes<Key, T>& nodes) {
+	// nodes must not have null root
+	return Nodes<Key, T>(nodes.beforeMin, nodes.beforeMin, nodes.afterMax);
+}
+
+template<typename Key, typename T>
+Nodes<Key, T> GetParentNodes(const Nodes<Key, T>& nodes) {
+	// nodes must not have null root
+	return Nodes<Key, T>(nodes.root->parent, nodes.beforeMin, nodes.afterMax);
 }
 
 template<typename Key, typename T>
@@ -34,6 +54,11 @@ bool IsRootTheBeforeMin(const Nodes<Key, T>& nodes) {
 template<typename Key, typename T>
 bool IsRootTheAfterMax(const Nodes<Key, T>& nodes) {
 	return nodes.root == nodes.afterMax;
+}
+
+template<typename Key, typename T>
+bool IsRootNull(const Nodes<Key, T>& nodes) {
+	return nodes.root == nullptr;	
 }
 
 template<typename Key, typename T>
@@ -50,4 +75,44 @@ void LinkBeforeMinParentToRoot(const Nodes<Key, T>& nodes) {
 template<typename Key, typename T>
 void LinkAfterMaxParentToRoot(const Nodes<Key, T>& nodes) {
 	nodes.afterMax->parent = nodes.root;
+}
+
+template <typename Key, typename T>
+bool IsRightGreater(Nodes<Key, T> nodes) {
+	// node has populated root -> find greater to right of it, if exists!
+	nodes = GetRightNodes(nodes);
+	return !IsRootNull(nodes) && !IsRootTheAfterMax(nodes);
+}
+
+template <typename Key, typename T>
+bool IsLeftLess(Nodes<Key, T> nodes) {
+	// node has populated root -> find greater to right of it, if exists!
+	nodes = GetLeftNodes(nodes);
+	return !IsRootNull(nodes) && !IsRootTheBeforeMin(nodes);
+}
+
+template <typename Key, typename T>
+Nodes<Key, T> MaxOfCurrentTree(Nodes<Key, T> nodes) {
+	while(IsRightGreater(nodes)) {
+		nodes = GetRightNodes(nodes);
+	}
+	return nodes;
+}
+
+template <typename Key, typename T>
+Nodes<Key, T> Min(const Nodes<Key, T>& nodes)  {
+	return Nodes<Key, T>(nodes.beforeMin->parent, nodes.beforeMin, nodes.afterMax);
+}
+
+template <typename Key, typename T>
+Nodes<Key, T> MinOfCurrentTree(Nodes<Key, T> nodes)  {
+	while(IsLeftLess(nodes)) {
+		nodes = GetLeftNodes(nodes);
+	}
+	return nodes;
+}
+
+template<typename Key, typename T>
+bool AreNonKeyValuesTheSame(const Nodes<Key, T>& lhs, const Nodes<Key, T>& rhs) {
+	return lhs.beforeMin == rhs.beforeMin && lhs.afterMax == rhs.afterMax;
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include "BinarySearchNodes.h"
 #include <iterator>
 #include <cstddef>
 #include <type_traits>
@@ -21,9 +22,7 @@ public:
 	using difference_type = std::ptrdiff_t;
 	using pointer = std::pair<Key, T>*;
 	using reference = std::pair<Key, T>&;
-	explicit BinarySearchTreeIt(std::shared_ptr<Node<Key, T>> it, 
-								std::shared_ptr<Node<Key, T>> bfrMin,
-								std::shared_ptr<Node<Key, T>> afrMax);
+	explicit BinarySearchTreeIt(const Nodes<Key, T>& nodes);
 	std::pair<Key, T>& operator*() const;
 	std::pair<Key, T>* operator->() const;
 	BinarySearchTreeIt& operator++();
@@ -32,54 +31,29 @@ public:
 	BinarySearchTreeIt operator--(int);
 
 private:
-	std::shared_ptr<Node<Key, T>> MaxNode() const;
-	std::shared_ptr<Node<Key, T>> MinNode() const;
-
-	std::shared_ptr<Node<Key, T>> iter;
-	std::shared_ptr<Node<Key, T>> beforeMin;
-	std::shared_ptr<Node<Key, T>> afterMax;
+	Nodes<Key, T> m_nodes;
 };
 
 
 template <typename Key, typename T>
-BinarySearchTreeIt<Key, T>::BinarySearchTreeIt(std::shared_ptr<Node<Key, T>> it,
-											   std::shared_ptr<Node<Key, T>> bfrMin,
-											   std::shared_ptr<Node<Key, T>> afrMax) 
-: iter(it), beforeMin(bfrMin), afterMax(afrMax) {}
-
-template <typename Key, typename T>
-std::shared_ptr<Node<Key, T>> BinarySearchTreeIt<Key, T>::MaxNode() const {
-	auto node = iter;
-	while(node->right != nullptr && node->right != afterMax) {
-		node = node->right;
-	}
-	return node;
-}
-
-template <typename Key, typename T>
-std::shared_ptr<Node<Key, T>> BinarySearchTreeIt<Key, T>::MinNode() const {
-	auto node = iter;
-	while(node->left != nullptr && node->left != beforeMin) {
-		node = node->left;
-	}
-	return node;
-}
+BinarySearchTreeIt<Key, T>::BinarySearchTreeIt(const Nodes<Key, T>& nodes) 
+: m_nodes(nodes) {}
 
 template <typename Key, typename T>
 BinarySearchTreeIt<Key, T>& BinarySearchTreeIt<Key, T>::operator++() {
-	assert(iter != afterMax);
-	if(iter->right != nullptr && iter->right != afterMax) {
-		iter = BinarySearchTreeIt<Key, T>(iter->right, beforeMin, afterMax).MinNode();
+	assert(!IsRootTheAfterMax(m_nodes));
+	if(IsRightGreater(m_nodes)) {
+		m_nodes = MinOfCurrentTree(GetRightNodes(m_nodes));
 	} else {
-		while(IsParentLeftOfNode(*iter)) {
-			iter = iter->parent;
+		while(IsParentLeftOfNode(*m_nodes.root)) {
+			m_nodes = GetParentNodes(m_nodes);
 		}
 		// set to off-end iterator if there is no parent right of node
-		if(!DoesParentExist(*iter)) {
-			iter = afterMax;
+		if(!DoesParentExist(*m_nodes.root)) {
+			m_nodes = GetAfterMaxNodes(m_nodes);
 		// else set to parent on the right
 		} else {
-			iter = iter->parent;
+			m_nodes = GetParentNodes(m_nodes);
 		}
 	}
 	return *this;
@@ -94,19 +68,19 @@ BinarySearchTreeIt<Key, T> BinarySearchTreeIt<Key, T>::operator++(int) {
 
 template <typename Key, typename T>
 BinarySearchTreeIt<Key, T>& BinarySearchTreeIt<Key, T>::operator--() {
-	assert(iter != beforeMin);
-	if(iter->left != nullptr && iter->left != beforeMin) {
-		iter = BinarySearchTreeIt<Key, T>(iter->left, beforeMin, afterMax).MaxNode();
+	assert(!IsRootTheBeforeMin(m_nodes));
+	if(IsLeftLess(m_nodes)) {
+		m_nodes = MaxOfCurrentTree(GetLeftNodes(m_nodes));
 	} else {
-		while(IsParentRightOfNode(*iter)) {
-			iter = iter->parent;
+		while(IsParentRightOfNode(*m_nodes.root)) {
+			m_nodes = GetParentNodes(m_nodes);
 		}
 		// set to before min iterator if there is no parent left of node
-		if(!DoesParentExist(*iter)) {
-			iter = beforeMin;
+		if(!DoesParentExist(*m_nodes.root)) {
+			m_nodes = GetBeforeMinNodes(m_nodes);
 		// else set to parent on the left
 		} else {
-			iter = iter->parent;
+			m_nodes = GetParentNodes(m_nodes);
 		}
 	}
 	return *this;
@@ -121,8 +95,8 @@ BinarySearchTreeIt<Key, T> BinarySearchTreeIt<Key, T>::operator--(int) {
 
 template <typename Key, typename T>
 std::pair<Key, T>& BinarySearchTreeIt<Key, T>::operator*() const {
-	assert(iter != beforeMin && iter != afterMax);
-	return iter->value;
+	assert(DoesRootHaveKey(m_nodes));
+	return m_nodes.root->value;
 }
 
 template <typename Key, typename T>
@@ -132,8 +106,8 @@ std::pair<Key, T>* BinarySearchTreeIt<Key, T>::operator->() const {
 
 template <typename Key, typename T>
 bool operator==(const BinarySearchTreeIt<Key, T>& lhs, const BinarySearchTreeIt<Key, T>& rhs) {
-	assert(lhs.beforeMin == rhs.beforeMin && lhs.afterMax == rhs.afterMax);
-	return lhs.iter == rhs.iter;
+	assert(AreNonKeyValuesTheSame(lhs.m_nodes, rhs.m_nodes));
+	return lhs.m_nodes.root == rhs.m_nodes.root;
 }
 
 template <typename Key, typename T>
@@ -143,7 +117,7 @@ bool operator!=(const BinarySearchTreeIt<Key, T>& lhs, const BinarySearchTreeIt<
 
 template <typename Key, typename T>
 void swap(const  BinarySearchTreeIt<Key, T>& lhs, const BinarySearchTreeIt<Key, T>& rhs) {
-	assert(lhs.beforeMin == rhs.beforeMin && lhs.afterMax == rhs.afterMax);
+	assert(AreNonKeyValuesTheSame(lhs.m_nodes, rhs.m_nodes));
 	using std::swap;
-	swap(lhs.iter, rhs.iter);
+	swap(lhs.m_nodes.root, rhs.m_nodes.root);
 }

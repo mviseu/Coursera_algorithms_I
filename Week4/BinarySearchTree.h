@@ -96,7 +96,7 @@ bool BinarySearchTree<Key, T>::Empty() const {
 template<typename Key, typename T>
 typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::Find(const value_type& val) {
 	auto findNode = FindAux(nodes, val);
-	return BinarySearchTreeIt<Key, T>(findNode, nodes.beforeMin, nodes.afterMax);
+	return BinarySearchTreeIt<Key, T>(nodes);
 
 }
 
@@ -115,12 +115,12 @@ std::pair<typename BinarySearchTree<Key, T>::iterator, bool> BinarySearchTree<Ke
 
 template <typename Key, typename T>
 typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::Begin() const {
-	return BinarySearchTreeIt<Key, T>(nodes.beforeMin->parent, nodes.beforeMin, nodes.afterMax);
+	return BinarySearchTreeIt<Key, T>(Min(nodes));
 }
 
 template <typename Key, typename T>
 typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::End() const {
-	return BinarySearchTreeIt<Key, T>(nodes.afterMax, nodes.beforeMin, nodes.afterMax);
+	return BinarySearchTreeIt<Key, T>(GetAfterMaxNodes(nodes));
 }
 
 /*
