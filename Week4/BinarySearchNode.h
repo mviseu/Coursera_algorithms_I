@@ -49,4 +49,23 @@ int GetSizeBasedOnChildren(const Node<Key, T>& node) {
 
 }
 
+template<typename Key, typename T>
+std::shared_ptr<Node<Key, T>> CreateANewNode(const std::pair<Key, T>& val, std::shared_ptr<Node<Key, T>> par) {
+	return std::make_shared<Node<Key, T>>(Node<Key, T>(val, 1, par, nullptr, nullptr));
+}
+
+template<typename Key, typename T>
+std::shared_ptr<Node<Key, T>> CreateANewMin(const std::pair<Key, T>& val, std::shared_ptr<Node<Key, T>> par, std::shared_ptr<Node<Key, T>> beforeMin) {
+	return std::make_shared<Node<Key, T>>(Node<Key, T>(val, 1, par, beforeMin, nullptr));
+}
+
+template<typename Key, typename T>
+std::shared_ptr<Node<Key, T>> CreateANewMax(const std::pair<Key, T>& val, std::shared_ptr<Node<Key, T>> par, std::shared_ptr<Node<Key, T>> afterMax) {
+	return std::make_shared<Node<Key, T>>(Node<Key, T>(val, 1, par, nullptr, afterMax));
+}
+
+template<typename Key, typename T>
+std::shared_ptr<Node<Key, T>> CreateANewTree(const std::pair<Key, T>& val, std::shared_ptr<Node<Key, T>> beforeMin, std::shared_ptr<Node<Key, T>> afterMax) {
+	return std::make_shared<Node<Key, T>>(Node<Key, T>(val, 1, nullptr, beforeMin, afterMax));
+}
 

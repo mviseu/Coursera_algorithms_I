@@ -29,16 +29,16 @@ template <typename Key, typename T>
 std::optional<std::pair<std::shared_ptr<Node<Key, T>>, bool>>
 InsertIfFinalNode(std::shared_ptr<Node<Key, T>> parent, Nodes<Key, T> nodes, const std::pair<Key, T>& val) {
 	if(nodes.root == nullptr) {
-		nodes.root = std::make_shared<Node<Key, T>>(val, 1, parent, nullptr, nullptr);
+		nodes.root = CreateANewNode(val, parent);
 		return std::make_pair(nodes.root, true);
 	}
 	if(IsRootTheBeforeMin(nodes)) {
-		nodes.root = std::make_shared<Node<Key, T>>(val, 1, parent, nodes.beforeMin, nullptr);
+		nodes.root = CreateANewMin(val, parent, nodes.beforeMin);
 		LinkBeforeMinParentToRoot(nodes);
 		return std::make_pair(nodes.root, true);
 	}
 	if(IsRootTheAfterMax(nodes)) {
-		nodes.root = std::make_shared<Node<Key, T>>(val, 1, parent, nullptr, nodes.afterMax);
+		nodes.root = CreateANewMax(val, parent, nodes.afterMax);
 		LinkAfterMaxParentToRoot(nodes);
 		return std::make_pair(nodes.root, true);
 	}
@@ -103,7 +103,7 @@ typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::Find(const
 template<typename Key, typename T>
 std::pair<typename BinarySearchTree<Key, T>::iterator, bool> BinarySearchTree<Key, T>::Insert(const value_type& val) {
 	if(Empty()) {
-		nodes.root = std::make_shared<Node<Key, T>>(val, 1, nullptr, nodes.beforeMin, nodes.afterMax);
+		nodes.root = CreateANewTree(val, nodes.beforeMin, nodes.afterMax);
 		nodes.beforeMin->parent = nodes.root;
 		nodes.afterMax->parent = nodes.root;
 		return std::make_pair(Find(val), true);

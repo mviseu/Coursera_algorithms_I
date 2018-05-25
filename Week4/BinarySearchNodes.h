@@ -78,38 +78,40 @@ void LinkAfterMaxParentToRoot(const Nodes<Key, T>& nodes) {
 }
 
 template <typename Key, typename T>
-bool IsRightGreater(Nodes<Key, T> nodes) {
+bool IsRightGreater(const Nodes<Key, T>& nodes) {
 	// node has populated root -> find greater to right of it, if exists!
-	nodes = GetRightNodes(nodes);
-	return !IsRootNull(nodes) && !IsRootTheAfterMax(nodes);
+	auto right = GetRightNodes(nodes);
+	return !IsRootNull(right) && !IsRootTheAfterMax(right);
 }
 
 template <typename Key, typename T>
-bool IsLeftLess(Nodes<Key, T> nodes) {
+bool IsLeftLess(const Nodes<Key, T>& nodes) {
 	// node has populated root -> find greater to right of it, if exists!
-	nodes = GetLeftNodes(nodes);
-	return !IsRootNull(nodes) && !IsRootTheBeforeMin(nodes);
+	auto left = GetLeftNodes(nodes);
+	return !IsRootNull(left) && !IsRootTheBeforeMin(left);
 }
 
 template <typename Key, typename T>
-Nodes<Key, T> MaxOfCurrentTree(Nodes<Key, T> nodes) {
-	while(IsRightGreater(nodes)) {
-		nodes = GetRightNodes(nodes);
+Nodes<Key, T> MaxOfCurrentTree(const Nodes<Key, T>& nodes) {
+	auto max = nodes;
+	while(IsRightGreater(max)) {
+		max = GetRightNodes(max);
 	}
-	return nodes;
+	return max;
+}
+
+template <typename Key, typename T>
+Nodes<Key, T> MinOfCurrentTree(const Nodes<Key, T>& nodes)  {
+	auto min = nodes;
+	while(IsLeftLess(min)) {
+		min = GetLeftNodes(min);
+	}
+	return min;
 }
 
 template <typename Key, typename T>
 Nodes<Key, T> Min(const Nodes<Key, T>& nodes)  {
 	return Nodes<Key, T>(nodes.beforeMin->parent, nodes.beforeMin, nodes.afterMax);
-}
-
-template <typename Key, typename T>
-Nodes<Key, T> MinOfCurrentTree(Nodes<Key, T> nodes)  {
-	while(IsLeftLess(nodes)) {
-		nodes = GetLeftNodes(nodes);
-	}
-	return nodes;
 }
 
 template<typename Key, typename T>
