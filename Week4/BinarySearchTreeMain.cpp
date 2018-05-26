@@ -8,8 +8,10 @@ int main() {
 	auto pairHell = dict.Insert(std::make_pair(std::string("Hello"), 33));
 	std::cout << pairHell.first->first << " inserted: " << pairHell.second << std::endl;
 
+
 	auto pairBye = dict.Insert(std::make_pair(std::string("Bye"), 60));
 	std::cout << pairBye.first->first << " inserted: " << pairBye.second << std::endl;
+
 
 	auto pairThis = dict.Insert(std::make_pair(std::string("This"), 40));
 	std::cout << pairThis.first->first << " inserted: " << pairThis.second << std::endl;
@@ -25,9 +27,24 @@ int main() {
 
 	pairHell = dict.Insert(std::make_pair(std::string("Hello"), 100));
 	std::cout << pairHell.first->first << " inserted: " << pairHell.second << " value: " << pairHell.first->second << std::endl;
+
+	auto strB = std::string("b");
+	auto pairB = std::make_pair(strB, 300);
+	dict.Insert(pairB);
+	
+	
 	for(auto it = dict.Begin(); it != dict.End(); ++it) {
 		std::cout << it->first << std::endl;
+		//it->second = 3;
 	}
+	
+	
+	/*
+	auto it = dictCopy.CBegin();
+	std::cout << it->first << std::endl;
+		//it->second = 3;
+
+	*/
 	return 0;
 }
 

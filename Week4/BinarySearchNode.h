@@ -5,14 +5,14 @@
 template <typename Key, typename T>
 struct Node {
 	Node(const std::pair<Key, T>& val) : value(val) {}
-	Node(const std::pair<Key, T>& val, int sz, std::shared_ptr<Node> prt, std::shared_ptr<Node> lt, std::shared_ptr<Node> rt)
+	Node(const std::pair<Key, T>& val, int sz, std::shared_ptr<Node<Key, T>> prt, std::shared_ptr<Node<Key, T>> lt, std::shared_ptr<Node<Key, T>> rt)
 	: value(val), size(sz), parent(prt), left(lt), right(rt) {}
 	Node() = default;
-	std::pair<Key, T> value;
+	std::pair<const Key, T> value;
 	int size{0};
-	std::shared_ptr<Node> parent = nullptr;
-	std::shared_ptr<Node> left = nullptr;
-	std::shared_ptr<Node> right = nullptr;
+	std::shared_ptr<Node<Key, T>> parent = nullptr;
+	std::shared_ptr<Node<Key, T>> left = nullptr;
+	std::shared_ptr<Node<Key, T>> right = nullptr;
 };
 
 template <typename Key, typename T>
@@ -50,22 +50,22 @@ int GetSizeBasedOnChildren(const Node<Key, T>& node) {
 }
 
 template<typename Key, typename T>
-std::shared_ptr<Node<Key, T>> CreateANewNode(const std::pair<Key, T>& val, std::shared_ptr<Node<Key, T>> par) {
+std::shared_ptr<Node<Key, T>> CreateANewNode(const std::pair<const Key, T>& val, std::shared_ptr<Node<Key, T>> par) {
 	return std::make_shared<Node<Key, T>>(Node<Key, T>(val, 1, par, nullptr, nullptr));
 }
 
 template<typename Key, typename T>
-std::shared_ptr<Node<Key, T>> CreateANewMin(const std::pair<Key, T>& val, std::shared_ptr<Node<Key, T>> par, std::shared_ptr<Node<Key, T>> beforeMin) {
+std::shared_ptr<Node<Key, T>> CreateANewMin(const std::pair<const Key, T>& val, std::shared_ptr<Node<Key, T>> par, std::shared_ptr<Node<Key, T>> beforeMin) {
 	return std::make_shared<Node<Key, T>>(Node<Key, T>(val, 1, par, beforeMin, nullptr));
 }
 
 template<typename Key, typename T>
-std::shared_ptr<Node<Key, T>> CreateANewMax(const std::pair<Key, T>& val, std::shared_ptr<Node<Key, T>> par, std::shared_ptr<Node<Key, T>> afterMax) {
+std::shared_ptr<Node<Key, T>> CreateANewMax(const std::pair<const Key, T>& val, std::shared_ptr<Node<Key, T>> par, std::shared_ptr<Node<Key, T>> afterMax) {
 	return std::make_shared<Node<Key, T>>(Node<Key, T>(val, 1, par, nullptr, afterMax));
 }
 
 template<typename Key, typename T>
-std::shared_ptr<Node<Key, T>> CreateANewTree(const std::pair<Key, T>& val, std::shared_ptr<Node<Key, T>> beforeMin, std::shared_ptr<Node<Key, T>> afterMax) {
+std::shared_ptr<Node<Key, T>> CreateANewTree(const std::pair<const Key, T>& val, std::shared_ptr<Node<Key, T>> beforeMin, std::shared_ptr<Node<Key, T>> afterMax) {
 	return std::make_shared<Node<Key, T>>(Node<Key, T>(val, 1, nullptr, beforeMin, afterMax));
 }
 

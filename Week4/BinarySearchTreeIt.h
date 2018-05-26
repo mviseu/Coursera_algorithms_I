@@ -15,20 +15,21 @@ template <typename Key, typename T>
 class BinarySearchTreeIt {
 	friend bool operator== <Key, T>(const BinarySearchTreeIt<Key, T>& lhs, const BinarySearchTreeIt<Key, T>& rhs);
 	friend bool operator!= <Key, T>(const BinarySearchTreeIt<Key, T>& lhs, const BinarySearchTreeIt<Key, T>& rhs);
-	friend void swap<Key, T>(const  BinarySearchTreeIt<Key, T>& lhs, const BinarySearchTreeIt<Key, T>& rhs);
+	friend void swap<Key, T>(const BinarySearchTreeIt<Key, T>& lhs, const BinarySearchTreeIt<Key, T>& rhs);
 public:
 	using iterator_category = std::bidirectional_iterator_tag;
-	using value_type = std::pair<Key, T>;
+	using value_type = std::pair<const Key, T>;
 	using difference_type = std::ptrdiff_t;
-	using pointer = std::pair<Key, T>*;
-	using reference = std::pair<Key, T>&;
+	using pointer = value_type*;
+	using reference = value_type&;
 	explicit BinarySearchTreeIt(const Nodes<Key, T>& nodes);
-	std::pair<Key, T>& operator*() const;
-	std::pair<Key, T>* operator->() const;
-	BinarySearchTreeIt& operator++();
-	BinarySearchTreeIt operator++(int);
-	BinarySearchTreeIt& operator--();
-	BinarySearchTreeIt operator--(int);
+	operator BinarySearchTreeIt<Key, const T>() {return BinarySearchTreeIt<Key, const T>(m_nodes);}
+	reference operator*() const;
+	pointer operator->() const;
+	BinarySearchTreeIt<Key, T>& operator++();
+	BinarySearchTreeIt<Key, T> operator++(int);
+	BinarySearchTreeIt<Key, T>& operator--();
+	BinarySearchTreeIt<Key, T> operator--(int);
 
 private:
 	Nodes<Key, T> m_nodes;
@@ -94,13 +95,13 @@ BinarySearchTreeIt<Key, T> BinarySearchTreeIt<Key, T>::operator--(int) {
 }
 
 template <typename Key, typename T>
-std::pair<Key, T>& BinarySearchTreeIt<Key, T>::operator*() const {
+typename BinarySearchTreeIt<Key, T>::reference BinarySearchTreeIt<Key, T>::operator*() const {
 	assert(DoesRootHaveKey(m_nodes));
 	return m_nodes.root->value;
 }
 
 template <typename Key, typename T>
-std::pair<Key, T>* BinarySearchTreeIt<Key, T>::operator->() const {
+typename BinarySearchTreeIt<Key, T>::pointer BinarySearchTreeIt<Key, T>::operator->() const {
 	return &**this;
 }
 
