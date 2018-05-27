@@ -6,8 +6,8 @@
 template<typename Key, typename T>
 struct Nodes {
 	Nodes() {
-		beforeMin = std::make_shared<Node<Key, T>>(Node<Key, T>(std::make_pair(Key(), T())));
-		afterMax = std::make_shared<Node<Key, T>>(Node<Key, T>(std::make_pair(Key(), T())));
+		beforeMin = std::make_shared<Node<Key, T>>(std::make_pair(Key(), T()));
+		afterMax = std::make_shared<Node<Key, T>>(std::make_pair(Key(), T()));
 	}
 	Nodes(std::shared_ptr<Node<Key, T>> rt, std::shared_ptr<Node<Key, T>> bfr, std::shared_ptr<Node<Key, T>> afr)
 	: root(rt), beforeMin(bfr), afterMax(afr) {}
@@ -54,6 +54,11 @@ bool IsRootTheBeforeMin(const Nodes<Key, T>& nodes) {
 template<typename Key, typename T>
 bool IsRootTheAfterMax(const Nodes<Key, T>& nodes) {
 	return nodes.root == nodes.afterMax;
+}
+
+template<typename Key, typename T>
+bool IsLeftTheBeforeMin(const Nodes<Key, T>& nodes) {
+	return !IsRootNull(nodes) && nodes.root->left == nodes.beforeMin;
 }
 
 template<typename Key, typename T>
@@ -117,4 +122,12 @@ Nodes<Key, T> Min(const Nodes<Key, T>& nodes)  {
 template<typename Key, typename T>
 bool AreNonKeyValuesTheSame(const Nodes<Key, T>& lhs, const Nodes<Key, T>& rhs) {
 	return lhs.beforeMin == rhs.beforeMin && lhs.afterMax == rhs.afterMax;
+}
+
+template<typename Key, typename T>
+bool IsRootTheOnlyExistingNode(const Nodes<Key, T>& nodes) {
+	if(DoesRootHaveKey(nodes)) {
+		return nodes.root->left == nodes.beforeMin && nodes.root->right == nodes.afterMax;
+	}	
+	return false;
 }
