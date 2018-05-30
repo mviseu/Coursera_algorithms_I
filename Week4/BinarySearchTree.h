@@ -72,7 +72,7 @@ std::pair<std::shared_ptr<Node<Key, T>>, bool> insertAux(std::shared_ptr<Node<Ke
 }
 
 template <typename Key, typename T>
-void EraseWhenRightChildNull(const Node<Key, T>& eraseNode) {
+void EraseWhenRightChildNull(Node<Key, T>& eraseNode) {
 	if(!IsLeftNull(eraseNode)) {
 		eraseNode.left->parent = eraseNode.parent;
 	}
@@ -81,11 +81,14 @@ void EraseWhenRightChildNull(const Node<Key, T>& eraseNode) {
 	}
 	if(IsParentRightOfNode(eraseNode)) {
 		eraseNode.parent->left = eraseNode.left;
-	}	
+	}
+	eraseNode.parent = nullptr;
+	eraseNode.left = nullptr;
+	eraseNode.right = nullptr;
 }
 
 template <typename Key, typename T>
-void EraseWhenLeftChildNull(const Node<Key, T>& eraseNode) {
+void EraseWhenLeftChildNull(Node<Key, T>& eraseNode) {
 	if(!IsRightNull(eraseNode)) {
 		eraseNode.right->parent = eraseNode.parent;
 	}
@@ -95,6 +98,9 @@ void EraseWhenLeftChildNull(const Node<Key, T>& eraseNode) {
 	if(IsParentRightOfNode(eraseNode)) {
 		eraseNode.parent->left = eraseNode.right;
 	}
+	eraseNode.parent = nullptr;
+	eraseNode.left = nullptr;
+	eraseNode.right = nullptr;
 }
 
 template <typename Key, typename T>
@@ -102,7 +108,7 @@ void MakeChildrenPointToNode(std::shared_ptr<Node<Key, T>> node) {
 	if(!IsLeftNull(*node)) {
 		node->left->parent = node;
 	}
-	if(IsRightNull(*node)) {
+	if(!IsRightNull(*node)) {
 		node->right->parent = node;
 	}
 }
@@ -157,6 +163,8 @@ void EraseRoot(Nodes<Key, T>& nodes) {
 	if(IsRootTheOnlyExistingNode(nodes)) {
 		nodes.afterMax->parent = nullptr;
 		nodes.beforeMin->parent = nullptr;
+		nodes.afterMax->left = nodes.beforeMin;
+		nodes.beforeMin->right = nodes.afterMax;
 		nodes = Nodes<Key, T>(nullptr, nodes.afterMax, nodes.beforeMin);
 		return;
 	}
@@ -169,7 +177,7 @@ void EraseRoot(Nodes<Key, T>& nodes) {
 }
 
 template <typename Key, typename T>
-void EraseWhenOneChildIsNull(const Node<Key, T>& eraseNode) {
+void EraseWhenOneChildIsNull(Node<Key, T>& eraseNode) {
 		// check the size
 	if(IsRightNull(eraseNode)) {
 		EraseWhenRightChildNull(eraseNode);
@@ -262,14 +270,22 @@ typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::erase(iter
 	if(pos == end()) {
 		return end();
 	}
-	auto findNode = findAux(m_nodes, pos->first); //
-	auto findNodeNext = ++iterator(Nodes<Key, T>(findNode, m_nodes.beforeMin, m_nodes.afterMax));
+	auto findNode = findAux(m_nodes, pos->first);
+	std::optional<Key> nextKey;
+	auto itNext = ++iterator(Nodes<Key, T>(findNode, m_nodes.beforeMin, m_nodes.afterMax));
+	if(itNext != end()) {
+		nextKey = itNext->first;
+	}
 	eraseAux(m_nodes, pos->first);
-	return findNodeNext;
+	auto findnext = find(*nextKey);
+	return nextKey ? findnext : end(); 
 }
 
 template <typename Key, typename T>
 typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::begin() {
+	if(empty()) {
+		return end();
+	}
 	return iterator(Min(m_nodes));
 }
 

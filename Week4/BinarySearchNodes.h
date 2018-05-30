@@ -8,6 +8,8 @@ struct Nodes {
 	Nodes() {
 		beforeMin = std::make_shared<Node<Key, T>>(std::make_pair(Key(), T()));
 		afterMax = std::make_shared<Node<Key, T>>(std::make_pair(Key(), T()));
+		beforeMin->right = afterMax;
+		afterMax->left = beforeMin;
 	}
 	Nodes(std::shared_ptr<Node<Key, T>> rt, std::shared_ptr<Node<Key, T>> bfr, std::shared_ptr<Node<Key, T>> afr)
 	: root(rt), beforeMin(bfr), afterMax(afr) {}

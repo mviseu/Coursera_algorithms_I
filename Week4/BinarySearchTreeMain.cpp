@@ -25,13 +25,55 @@ int main() {
 	for(auto it = dict.begin(); it != dict.end(); ++it) {
 		std::cout << it->first << std::endl;
 	}
-	auto eraseIt = dict.find("x");
-	dict.erase(eraseIt);
-
-	std::cout << "after erase" << std::endl;
+	
+	std::cout << "after erase " << std::endl;
+	dict.erase(dict.find("Hello"));
+	std::cout << "beg loop" << std::endl;
 	for(auto it = dict.begin(); it != dict.end(); ++it) {
 		std::cout << it->first << std::endl;
 	}
+	std::cout << "end loop" << std::endl;
+	
+	std::cout << "done" << std::endl;
+	dict.erase(dict.find("Bye"));
+	std::cout << "beg loop" << std::endl;
+	for(auto it = dict.begin(); it != dict.end(); ++it) {
+		std::cout << it->first << std::endl;
+	}
+	std::cout << "end loop" << std::endl;
+
+	std::cout << "done" << std::endl;
+	dict.erase(dict.find("This"));
+	std::cout << "beg loop" << std::endl;
+	for(auto it = dict.begin(); it != dict.end(); ++it) {
+		std::cout << it->first << std::endl;
+	}
+	std::cout << "end loop" << std::endl;
+
+		std::cout << "done" << std::endl;
+	dict.erase(dict.find("is"));
+	std::cout << "beg loop" << std::endl;
+	for(auto it = dict.begin(); it != dict.end(); ++it) {
+		std::cout << it->first << std::endl;
+	}
+	std::cout << "end loop" << std::endl;
+
+		std::cout << "done" << std::endl;
+	dict.erase(dict.find("a"));
+	std::cout << "beg loop" << std::endl;
+	for(auto it = dict.begin(); it != dict.end(); ++it) {
+		std::cout << it->first << std::endl;
+	}
+	std::cout << "end loop" << std::endl;
+
+	
+	dict.erase(dict.find("x"));
+	std::cout << "beg loop" << std::endl;
+	for(auto it = dict.begin(); it != dict.end(); ++it) {
+		std::cout << "once" << std::endl;
+		std::cout << it->first << std::endl;
+	}
+	std::cout << "end loop" << std::endl;
 
 	return 0;
 }
