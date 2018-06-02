@@ -2,6 +2,7 @@
 #include "BinarySearchNode.h"
 #include <memory>
 #include <utility>
+#include <iostream>
 
 template<typename Key, typename T>
 struct Nodes {
@@ -78,7 +79,6 @@ void LinkBeforeMinParentToRoot(const Nodes<Key, T>& nodes) {
 	nodes.beforeMin->parent = nodes.root;
 }
 
-
 template<typename Key, typename T>
 void LinkAfterMaxParentToRoot(const Nodes<Key, T>& nodes) {
 	nodes.afterMax->parent = nodes.root;
@@ -140,15 +140,34 @@ bool IsRootTheOnlyExistingNode(const Nodes<Key, T>& nodes) {
 }
 
 template<typename Key, typename T>
+int GetSizeBasedOnChildren(const Nodes<Key, T>& nodes) {
+	auto sz = 0;
+	if(DoesRootHaveKey(nodes)) {
+		sz += 1;
+	}
+	if(IsLeftLess(nodes)) {
+		sz += nodes.root->left->size;
+	}
+	if(IsRightGreater(nodes)){
+		sz += nodes.root->right->size;
+	}
+	return sz;
+}
+
+template<typename Key, typename T>
 Nodes<Key, T> UpdateRightNodes(const Nodes<Key, T>& currNodes, const Nodes<Key, T>& rightNodes) {
 	auto nodeWithNewRight = std::make_shared<Node<Key, T>>(currNodes.root->value, currNodes.root->size, currNodes.root->parent, currNodes.root->left, rightNodes.root);
-	nodeWithNewRight->size = GetSizeBasedOnChildren(*nodeWithNewRight);
-	return Nodes<Key, T>(nodeWithNewRight, currNodes.beforeMin, rightNodes.afterMax);
+	auto updatedNodes = Nodes<Key, T>(nodeWithNewRight, currNodes.beforeMin, rightNodes.afterMax);
+	updatedNodes.root->size = GetSizeBasedOnChildren(updatedNodes);
+	PointNodeRelativesToItself(updatedNodes.root);
+	return updatedNodes;
 }
 
 template<typename Key, typename T>
 Nodes<Key, T> UpdateLeftNodes(const Nodes<Key, T>& currNodes, const Nodes<Key, T>& leftNodes) {
 	auto nodeWithNewLeft = std::make_shared<Node<Key, T>>(currNodes.root->value, currNodes.root->size, currNodes.root->parent, leftNodes.root, currNodes.root->right);
-	nodeWithNewLeft->size = GetSizeBasedOnChildren(*nodeWithNewLeft);
-	return Nodes<Key, T>(nodeWithNewLeft, leftNodes.beforeMin, currNodes.afterMax);
+	auto updatedNodes = Nodes<Key, T>(nodeWithNewLeft, leftNodes.beforeMin, currNodes.afterMax);
+	updatedNodes.root->size = GetSizeBasedOnChildren(updatedNodes);
+	PointNodeRelativesToItself(updatedNodes.root);
+	return updatedNodes;
 }

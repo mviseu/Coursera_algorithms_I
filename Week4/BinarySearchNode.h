@@ -51,19 +51,6 @@ bool IsParentNull(const Node<Key, T>& node) {
 	return node.parent == nullptr;
 }
 
-template <typename Key, typename T>
-int GetSizeBasedOnChildren(const Node<Key, T>& node) {
-	auto sz = 1;
-	if(node.left != nullptr) {
-		sz += node.left->size;
-	}
-	if(node.right != nullptr) {
-		sz += node.right->size;
-	}
-	return sz;
-
-}
-
 template<typename Key, typename T>
 std::shared_ptr<Node<Key, T>> CreateANewNode(const std::pair<const Key, T>& val, std::shared_ptr<Node<Key, T>> par) {
 	return std::make_shared<Node<Key, T>>(val, 1, par, nullptr, nullptr);
@@ -82,5 +69,48 @@ std::shared_ptr<Node<Key, T>> CreateANewMax(const std::pair<const Key, T>& val, 
 template<typename Key, typename T>
 std::shared_ptr<Node<Key, T>> CreateANewTree(const std::pair<const Key, T>& val, std::shared_ptr<Node<Key, T>> beforeMin, std::shared_ptr<Node<Key, T>> afterMax) {
 	return std::make_shared<Node<Key, T>>(val, 1, nullptr, beforeMin, afterMax);
+}
+
+template <typename Key, typename T>
+void MakeChildrenPointToNode(std::shared_ptr<Node<Key, T>> node) {
+	if(!IsLeftNull(*node)) {
+		node->left->parent = node;
+	}
+	if(!IsRightNull(*node)) {
+		node->right->parent = node;
+	}
+}
+
+template <typename Key, typename T>
+void MakeLeftParentPointToNode(std::shared_ptr<Node<Key, T>> node) {
+	if(!IsParentNull(*node)) {
+		node->parent->right = node;
+	}
+}
+
+template <typename Key, typename T>
+void MakeRightParentPointToNode(std::shared_ptr<Node<Key, T>> node) {
+	if(!IsParentNull(*node)) {
+		node->parent->left = node;
+	}
+}
+
+template <typename Key, typename T> 
+void PointNodeRelativesToItself(std::shared_ptr<Node<Key, T>> node) {
+	MakeChildrenPointToNode(node);
+	if(IsParentLeftOfNode(*node)) {
+		MakeLeftParentPointToNode(node);
+	}
+	if(IsParentRightOfNode(*node)) {
+		MakeRightParentPointToNode(node);
+	}	
+}
+
+template <typename Key, typename T> 
+int GetSizeOfLeftSubTree(const Node<Key, T>& node) {
+	if(!IsLeftNull(node)) {
+		return node.left->size;
+	}
+	return 0;
 }
 

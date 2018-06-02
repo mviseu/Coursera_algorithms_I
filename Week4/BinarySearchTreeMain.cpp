@@ -23,17 +23,19 @@ int main() {
 
 	for(auto it = dict.begin(); it != dict.end(); ++it) {
 		std::cout << it->first << std::endl;
+		std::cout << "Rank is:" << dict.Rank(it->first) << std::endl;
 	}
 
+	
 	std::cout << "after erase " << std::endl;
-	dict.erase(dict.find("x"));
+	dict.erase(dict.find("Hello"));
 	std::cout << "beg loop" << std::endl;
 	for(auto it = dict.begin(); it != dict.end(); ++it) {
 		std::cout << it->first << std::endl;
 	}
 	std::cout << "end loop" << std::endl;
 	
-	/*
+	
 	std::cout << "done" << std::endl;
 	dict.erase(dict.find("Bye"));
 	std::cout << "beg loop" << std::endl;
@@ -76,7 +78,8 @@ int main() {
 		std::cout << it->first << std::endl;
 	}
 	std::cout << "end loop" << std::endl;
-	*/
+	
+	
 	return 0;
 }
 

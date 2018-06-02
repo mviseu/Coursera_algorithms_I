@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <utility>
 #include <assert.h>
+#include <iostream>
 
 template <typename Key, typename T, typename UnqualifiedT> class BinarySearchTreeIt;
 template <typename Key, typename T, typename UnqualifiedT> bool operator==(const BinarySearchTreeIt<Key, T, UnqualifiedT>& lhs, const BinarySearchTreeIt<Key, T, UnqualifiedT>& rhs);

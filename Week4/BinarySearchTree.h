@@ -66,7 +66,7 @@ std::pair<std::shared_ptr<Node<Key, T>>, bool> insertAux(std::shared_ptr<Node<Ke
 		insertPair = insertAux(nodes.root, GetRightNodes(nodes), val);
 		nodes.root->right = insertPair.first;
 	}
-	nodes.root->size = GetSizeBasedOnChildren(*nodes.root);
+	nodes.root->size = GetSizeBasedOnChildren(nodes);
 	return std::make_pair(nodes.root, insertPair.second);
 
 }
@@ -100,30 +100,6 @@ Nodes<Key, T> EraseWhenLeftChildNull(const Nodes<Key, T>& nodes) {
 }
 
 template <typename Key, typename T>
-void MakeChildrenPointToNode(std::shared_ptr<Node<Key, T>> node) {
-	if(!IsLeftNull(*node)) {
-		node->left->parent = node;
-	}
-	if(!IsRightNull(*node)) {
-		node->right->parent = node;
-	}
-}
-
-template <typename Key, typename T>
-void MakeLeftParentPointToNode(std::shared_ptr<Node<Key, T>> node) {
-	if(!IsParentNull(*node)) {
-		node->parent->right = node;
-	}
-}
-
-template <typename Key, typename T>
-void MakeRightParentPointToNode(std::shared_ptr<Node<Key, T>> node) {
-	if(!IsParentNull(*node)) {
-		node->parent->left = node;
-	}
-}
-
-template <typename Key, typename T>
 Nodes<Key, T> eraseAux(const Nodes<Key, T>& nodes, const Key& key);
 
 template <typename Key, typename T>
@@ -132,8 +108,7 @@ Nodes<Key, T> ReplaceEraseByMinOnRight(const Nodes<Key, T>& nodes) {
 	auto successorPair = std::pair<const Key, T>(minVal.first, minVal.second);
 	auto treeNoSuccessor = eraseAux(nodes, successorPair.first); 
 	auto newNode = std::make_shared<Node<Key, T>>(successorPair, treeNoSuccessor.root->size, treeNoSuccessor.root->parent, treeNoSuccessor.root->left, treeNoSuccessor.root->right);
-	MakeChildrenPointToNode(newNode);
-	MakeLeftParentPointToNode(newNode);
+	PointNodeRelativesToItself(newNode);
 	return Nodes<Key, T>(newNode, nodes.beforeMin, nodes.afterMax);
 }
 
@@ -143,8 +118,7 @@ Nodes<Key, T> ReplaceEraseByMaxOnLeft(const Nodes<Key, T>& nodes) {
 	auto successorPair = std::pair<const Key, T>(maxVal);
 	auto treeNoSuccessor = eraseAux(nodes, successorPair.first);
 	auto newNode = std::make_shared<Node<Key, T>>(successorPair, treeNoSuccessor.root->size, treeNoSuccessor.root->parent, treeNoSuccessor.root->left, treeNoSuccessor.root->right);
-	MakeChildrenPointToNode(newNode);
-	MakeRightParentPointToNode(newNode);
+	PointNodeRelativesToItself(newNode);
 	return Nodes<Key, T>(newNode, treeNoSuccessor.beforeMin, treeNoSuccessor.afterMax);
 }
 
@@ -206,6 +180,20 @@ Nodes<Key, T> eraseAux(const Nodes<Key, T>& nodes, const Key& key) {
 	return UpdateLeftNodes(nodes, leftNodes);
 }
 
+template <typename Key, typename T>
+int RankAux(const Nodes<Key, T>& nodes, const Key& targetKey) {
+	if(!DoesRootHaveKey(nodes)) {
+		return 0;
+	}
+	if(nodes.root->value.first == targetKey) {
+		return GetSizeOfLeftSubTree(*nodes.root);
+	}
+	if(nodes.root->value.first < targetKey) {
+		return 1 + GetSizeOfLeftSubTree(*nodes.root) + RankAux(GetRightNodes(nodes), targetKey); 
+	}
+	return RankAux(GetLeftNodes(nodes), targetKey);
+}
+
 } // namespace
 
 template <typename Key, typename T>
@@ -223,6 +211,7 @@ public:
 	std::pair<iterator, bool> insert(const value_type& val);
 	iterator erase(iterator pos);
 	bool empty() const;
+	int Rank(const Key& targetKey) const;
 	const_iterator begin() const;
 	const_iterator end() const;
 	const_iterator cbegin() const;
@@ -274,6 +263,12 @@ typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::erase(iter
 	m_nodes = eraseAux(m_nodes, key);
 	auto findnext = find(*nextKey);
 	return nextKey ? findnext : end();
+}
+
+//Rank -> how many keys < target key?
+template<typename Key, typename T>
+int BinarySearchTree<Key, T>::Rank(const Key& targetKey) const {
+	return RankAux(m_nodes, targetKey);
 }
 
 template <typename Key, typename T>
