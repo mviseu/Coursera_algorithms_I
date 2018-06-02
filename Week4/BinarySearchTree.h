@@ -72,35 +72,31 @@ std::pair<std::shared_ptr<Node<Key, T>>, bool> insertAux(std::shared_ptr<Node<Ke
 }
 
 template <typename Key, typename T>
-void EraseWhenRightChildNull(Node<Key, T>& eraseNode) {
-	if(!IsLeftNull(eraseNode)) {
-		eraseNode.left->parent = eraseNode.parent;
+Nodes<Key, T> EraseWhenRightChildNull(const Nodes<Key, T>& nodes) {
+	if(!IsLeftNull(*nodes.root)) {
+		nodes.root->left->parent = nodes.root->parent;
 	}
-	if(IsParentLeftOfNode(eraseNode)) {
-		eraseNode.parent->right = eraseNode.left;
+	if(IsParentLeftOfNode(*nodes.root)) {
+		nodes.root->parent->right = nodes.root->left;
 	}
-	if(IsParentRightOfNode(eraseNode)) {
-		eraseNode.parent->left = eraseNode.left;
+	if(IsParentRightOfNode(*nodes.root)) {
+		nodes.root->parent->left = nodes.root->left;
 	}
-	eraseNode.parent = nullptr;
-	eraseNode.left = nullptr;
-	eraseNode.right = nullptr;
+	return GetLeftNodes(nodes);
 }
 
 template <typename Key, typename T>
-void EraseWhenLeftChildNull(Node<Key, T>& eraseNode) {
-	if(!IsRightNull(eraseNode)) {
-		eraseNode.right->parent = eraseNode.parent;
+Nodes<Key, T> EraseWhenLeftChildNull(const Nodes<Key, T>& nodes) {
+	if(!IsRightNull(*nodes.root)) {
+		nodes.root->right->parent = nodes.root->parent;
 	}
-	if(IsParentLeftOfNode(eraseNode)) {
-		eraseNode.parent->right = eraseNode.right;
+	if(IsParentLeftOfNode(*nodes.root)) {
+		nodes.root->parent->right = nodes.root->right;
 	}
-	if(IsParentRightOfNode(eraseNode)) {
-		eraseNode.parent->left = eraseNode.right;
+	if(IsParentRightOfNode(*nodes.root)) {
+		nodes.root->parent->left = nodes.root->right;
 	}
-	eraseNode.parent = nullptr;
-	eraseNode.left = nullptr;
-	eraseNode.right = nullptr;
+	return GetRightNodes(nodes);
 }
 
 template <typename Key, typename T>
@@ -128,88 +124,86 @@ void MakeRightParentPointToNode(std::shared_ptr<Node<Key, T>> node) {
 }
 
 template <typename Key, typename T>
-void eraseAux(Nodes<Key, T>& nodes,
-			  const Key& key);
+Nodes<Key, T> eraseAux(const Nodes<Key, T>& nodes, const Key& key);
 
 template <typename Key, typename T>
-void ReplaceEraseByMinOnRight(Nodes<Key, T>& eraseNodes) {
-	auto minVal = (MinOfCurrentTree(GetRightNodes(eraseNodes)).root)->value;
+Nodes<Key, T> ReplaceEraseByMinOnRight(const Nodes<Key, T>& nodes) {
+	auto minVal = (MinOfCurrentTree(GetRightNodes(nodes)).root)->value;
 	auto successorPair = std::pair<const Key, T>(minVal.first, minVal.second);
-	eraseAux(eraseNodes, successorPair.first);
-	auto newNode = std::make_shared<Node<Key, T>>(successorPair, eraseNodes.root->size, eraseNodes.root->parent, eraseNodes.root->left, eraseNodes.root->right);
+	auto treeNoSuccessor = eraseAux(nodes, successorPair.first); 
+	auto newNode = std::make_shared<Node<Key, T>>(successorPair, treeNoSuccessor.root->size, treeNoSuccessor.root->parent, treeNoSuccessor.root->left, treeNoSuccessor.root->right);
 	MakeChildrenPointToNode(newNode);
 	MakeLeftParentPointToNode(newNode);
-	eraseNodes = Nodes<Key, T>(newNode, eraseNodes.beforeMin, eraseNodes.afterMax);
+	return Nodes<Key, T>(newNode, nodes.beforeMin, nodes.afterMax);
 }
 
 template <typename Key, typename T>
-void ReplaceEraseByMaxOnLeft(Nodes<Key, T>& eraseNodes) {
-	auto maxVal = (MaxOfCurrentTree(GetLeftNodes(eraseNodes)).root)->value;
+Nodes<Key, T> ReplaceEraseByMaxOnLeft(const Nodes<Key, T>& nodes) {
+	auto maxVal = (MaxOfCurrentTree(GetLeftNodes(nodes)).root)->value;
 	auto successorPair = std::pair<const Key, T>(maxVal);
-	eraseAux(eraseNodes, successorPair.first);
-	auto newNode = std::make_shared<Node<Key, T>>(successorPair, eraseNodes.root->size, eraseNodes.root->parent, eraseNodes.root->left, eraseNodes.root->right);
+	auto treeNoSuccessor = eraseAux(nodes, successorPair.first);
+	auto newNode = std::make_shared<Node<Key, T>>(successorPair, treeNoSuccessor.root->size, treeNoSuccessor.root->parent, treeNoSuccessor.root->left, treeNoSuccessor.root->right);
 	MakeChildrenPointToNode(newNode);
 	MakeRightParentPointToNode(newNode);
-	eraseNodes = Nodes<Key, T>(newNode, eraseNodes.beforeMin, eraseNodes.afterMax);
+	return Nodes<Key, T>(newNode, treeNoSuccessor.beforeMin, treeNoSuccessor.afterMax);
 }
 
 template <typename Key, typename T>
-bool IsEraseNodeTheRoot(const Nodes<Key, T>& treeWithRoot, std::shared_ptr<Node<Key, T>> eraseNode) {
-	return treeWithRoot.root == eraseNode;
-}
-
-template <typename Key, typename T>
-void EraseRoot(Nodes<Key, T>& nodes) {
+Nodes<Key, T> EraseRoot(const Nodes<Key, T>& nodes) {
 	if(IsRootTheOnlyExistingNode(nodes)) {
 		nodes.afterMax->parent = nullptr;
 		nodes.beforeMin->parent = nullptr;
 		nodes.afterMax->left = nodes.beforeMin;
 		nodes.beforeMin->right = nodes.afterMax;
-		nodes = Nodes<Key, T>(nullptr, nodes.afterMax, nodes.beforeMin);
-		return;
+		return Nodes<Key, T>(nullptr, nodes.afterMax, nodes.beforeMin);
 	}
 	if(IsLeftTheBeforeMin(nodes)) {
-		ReplaceEraseByMinOnRight(nodes);
-		return;
+		return ReplaceEraseByMinOnRight(nodes);
 	}
-	ReplaceEraseByMaxOnLeft(nodes);
-	return;
+	return ReplaceEraseByMaxOnLeft(nodes);
 }
 
 template <typename Key, typename T>
-void EraseWhenOneChildIsNull(Node<Key, T>& eraseNode) {
+Nodes<Key, T> EraseWhenOneChildIsNull(const Nodes<Key, T>& nodes) {
 		// check the size
-	if(IsRightNull(eraseNode)) {
-		EraseWhenRightChildNull(eraseNode);
-		return;
+	if(IsRightNull(*nodes.root)) {
+		return EraseWhenRightChildNull(nodes);
 	}
-	EraseWhenLeftChildNull(eraseNode);
-	return;
+	return EraseWhenLeftChildNull(nodes);
 }
 
 template <typename Key, typename T>
-void eraseAux(Nodes<Key, T>& nodes,
-			  const Key& key) {
+Nodes<Key, T> EraseCurrentNode(const Nodes<Key, T>& nodes) {
+	if(IsTreeAtTheRoot(nodes)) {
+		return EraseRoot(nodes);
+	}
+	if(IsRightNull(*nodes.root) || IsLeftNull(*nodes.root)) {
+		return EraseWhenOneChildIsNull(nodes);
+	}
+	if(IsRightGreater(nodes)) {
+		return ReplaceEraseByMinOnRight(nodes);
+	}
+	if(IsLeftLess(nodes)) {
+		return ReplaceEraseByMaxOnLeft(nodes);
+	}
+	return nodes;	
+}
+
+template <typename Key, typename T>
+Nodes<Key, T> eraseAux(const Nodes<Key, T>& nodes, const Key& key) {
 	// missing: update the size
-	auto eraseNode = findAux(nodes, key);
-	if(IsEraseNodeTheRoot(nodes, eraseNode)) {
-		EraseRoot(nodes);
-		return;
+	assert(DoesRootHaveKey(nodes));
+	auto nodeKey = nodes.root->value.first;
+	if(nodeKey == key) {
+		return EraseCurrentNode(nodes);
 	}
-	if(IsRightNull(*eraseNode) || IsLeftNull(*eraseNode)) {
-		EraseWhenOneChildIsNull(*eraseNode);
-		return;
+	auto nodesNew = nodes;
+	if(nodeKey < key) {
+		auto rightNodes = eraseAux(GetRightNodes(nodes), key);
+		return UpdateRightNodes(nodes, rightNodes);
 	}
-	auto eraseNodes = Nodes<Key, T>(eraseNode, nodes.beforeMin, nodes.afterMax);
-	if(IsRightGreater(eraseNodes)) {
-		ReplaceEraseByMinOnRight(eraseNodes);
-		return;
-	}
-	if(IsLeftLess(eraseNodes)) {
-		ReplaceEraseByMaxOnLeft(eraseNodes);
-		return;
-	}
-	return;
+	auto leftNodes = eraseAux(GetLeftNodes(nodes), key);
+	return UpdateLeftNodes(nodes, leftNodes);
 }
 
 } // namespace
@@ -270,15 +264,16 @@ typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::erase(iter
 	if(pos == end()) {
 		return end();
 	}
-	auto findNode = findAux(m_nodes, pos->first);
+	auto key = pos->first;
+	auto findNode = findAux(m_nodes, key);
 	std::optional<Key> nextKey;
 	auto itNext = ++iterator(Nodes<Key, T>(findNode, m_nodes.beforeMin, m_nodes.afterMax));
 	if(itNext != end()) {
 		nextKey = itNext->first;
 	}
-	eraseAux(m_nodes, pos->first);
+	m_nodes = eraseAux(m_nodes, key);
 	auto findnext = find(*nextKey);
-	return nextKey ? findnext : end(); 
+	return nextKey ? findnext : end();
 }
 
 template <typename Key, typename T>

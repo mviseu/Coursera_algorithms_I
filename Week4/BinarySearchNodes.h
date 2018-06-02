@@ -13,7 +13,7 @@ struct Nodes {
 	}
 	Nodes(std::shared_ptr<Node<Key, T>> rt, std::shared_ptr<Node<Key, T>> bfr, std::shared_ptr<Node<Key, T>> afr)
 	: root(rt), beforeMin(bfr), afterMax(afr) {}
-	std::shared_ptr<Node<Key, T>> root = nullptr;
+	std::shared_ptr<Node<Key, T>> root = nullptr; // change name to node
 	std::shared_ptr<Node<Key, T>> beforeMin = nullptr;
 	std::shared_ptr<Node<Key, T>> afterMax = nullptr;
 };
@@ -127,9 +127,28 @@ bool AreNonKeyValuesTheSame(const Nodes<Key, T>& lhs, const Nodes<Key, T>& rhs) 
 }
 
 template<typename Key, typename T>
+bool IsTreeAtTheRoot(const Nodes<Key, T>& nodes) {
+	return !IsRootNull(nodes) && nodes.root->parent == nullptr;
+}
+
+template<typename Key, typename T>
 bool IsRootTheOnlyExistingNode(const Nodes<Key, T>& nodes) {
 	if(DoesRootHaveKey(nodes)) {
 		return nodes.root->left == nodes.beforeMin && nodes.root->right == nodes.afterMax;
 	}	
 	return false;
+}
+
+template<typename Key, typename T>
+Nodes<Key, T> UpdateRightNodes(const Nodes<Key, T>& currNodes, const Nodes<Key, T>& rightNodes) {
+	auto nodeWithNewRight = std::make_shared<Node<Key, T>>(currNodes.root->value, currNodes.root->size, currNodes.root->parent, currNodes.root->left, rightNodes.root);
+	nodeWithNewRight->size = GetSizeBasedOnChildren(*nodeWithNewRight);
+	return Nodes<Key, T>(nodeWithNewRight, currNodes.beforeMin, rightNodes.afterMax);
+}
+
+template<typename Key, typename T>
+Nodes<Key, T> UpdateLeftNodes(const Nodes<Key, T>& currNodes, const Nodes<Key, T>& leftNodes) {
+	auto nodeWithNewLeft = std::make_shared<Node<Key, T>>(currNodes.root->value, currNodes.root->size, currNodes.root->parent, leftNodes.root, currNodes.root->right);
+	nodeWithNewLeft->size = GetSizeBasedOnChildren(*nodeWithNewLeft);
+	return Nodes<Key, T>(nodeWithNewLeft, leftNodes.beforeMin, currNodes.afterMax);
 }

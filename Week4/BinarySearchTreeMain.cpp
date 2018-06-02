@@ -21,19 +21,19 @@ int main() {
 	pairHell = dict.insert(std::make_pair(std::string("Hello"), 100));
 	std::cout << pairHell.first->first << " inserted: " << pairHell.second << " value: " << pairHell.first->second << std::endl;
 
-     
 	for(auto it = dict.begin(); it != dict.end(); ++it) {
 		std::cout << it->first << std::endl;
 	}
-	
+
 	std::cout << "after erase " << std::endl;
-	dict.erase(dict.find("Hello"));
+	dict.erase(dict.find("x"));
 	std::cout << "beg loop" << std::endl;
 	for(auto it = dict.begin(); it != dict.end(); ++it) {
 		std::cout << it->first << std::endl;
 	}
 	std::cout << "end loop" << std::endl;
 	
+	/*
 	std::cout << "done" << std::endl;
 	dict.erase(dict.find("Bye"));
 	std::cout << "beg loop" << std::endl;
@@ -41,7 +41,7 @@ int main() {
 		std::cout << it->first << std::endl;
 	}
 	std::cout << "end loop" << std::endl;
-
+	
 	std::cout << "done" << std::endl;
 	dict.erase(dict.find("This"));
 	std::cout << "beg loop" << std::endl;
@@ -50,7 +50,8 @@ int main() {
 	}
 	std::cout << "end loop" << std::endl;
 
-		std::cout << "done" << std::endl;
+	std::cout << "done" << std::endl;
+
 	dict.erase(dict.find("is"));
 	std::cout << "beg loop" << std::endl;
 	for(auto it = dict.begin(); it != dict.end(); ++it) {
@@ -58,7 +59,8 @@ int main() {
 	}
 	std::cout << "end loop" << std::endl;
 
-		std::cout << "done" << std::endl;
+	std::cout << "done" << std::endl;
+	
 	dict.erase(dict.find("a"));
 	std::cout << "beg loop" << std::endl;
 	for(auto it = dict.begin(); it != dict.end(); ++it) {
@@ -74,7 +76,7 @@ int main() {
 		std::cout << it->first << std::endl;
 	}
 	std::cout << "end loop" << std::endl;
-
+	*/
 	return 0;
 }
 
