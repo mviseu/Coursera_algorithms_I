@@ -11,113 +11,113 @@
 namespace {
 
 template <typename Key, typename T>
-std::shared_ptr<Node<Key, T>> findAux(const Nodes<Key, T>& nodes,
+std::shared_ptr<Node<Key, T>> FindAux(const Nodes<Key, T>& nodes,
 								   	  const Key& key) {
 	if(!DoesRootHaveKey(nodes)) {
 		return nodes.afterMax;
 	}
-	if(key == nodes.root->value.first) {
-		return nodes.root;
+	if(IsNodeKeyEqualToTarget(*nodes.node, key)) {
+		return nodes.node;
 	}
-	if(key < nodes.root->value.first) {
-		return findAux(GetLeftNodes(nodes), key);
+	if(IsNodeKeyGreaterThanTarget(*nodes.node, key)) {
+		return FindAux(GetLeftNodes(nodes), key);
 	}
-	return findAux(GetRightNodes(nodes), key);
+	return FindAux(GetRightNodes(nodes), key);
 }
 
 template <typename Key, typename T>
 std::optional<std::pair<std::shared_ptr<Node<Key, T>>, bool>>
-insertIfFinalNode(std::shared_ptr<Node<Key, T>> parent, const Nodes<Key, T>& nodes, const std::pair<const Key, T>& val) {
-	if(nodes.root == nullptr) {
+InsertIfFinalNode(std::shared_ptr<Node<Key, T>> parent, const Nodes<Key, T>& nodes, const std::pair<const Key, T>& val) {
+	if(nodes.node == nullptr) {
 		return std::make_pair(CreateANewNode(val, parent), true);
 	}
 	if(IsRootTheBeforeMin(nodes)) {
 		auto newNodes = nodes;
-		newNodes.root = CreateANewMin(val, parent, newNodes.beforeMin);
+		newNodes.node = CreateANewMin(val, parent, newNodes.beforeMin);
 		LinkBeforeMinParentToRoot(newNodes);
-		return std::make_pair(newNodes.root, true);
+		return std::make_pair(newNodes.node, true);
 	}
 	if(IsRootTheAfterMax(nodes)) {
 		auto newNodes = nodes;
-		newNodes.root = CreateANewMax(val, parent, newNodes.afterMax);
+		newNodes.node = CreateANewMax(val, parent, newNodes.afterMax);
 		LinkAfterMaxParentToRoot(newNodes);
-		return std::make_pair(newNodes.root, true);
+		return std::make_pair(newNodes.node, true);
 	}
-	if(val.first == nodes.root->value.first) {
-		return std::make_pair(nodes.root, false);
+	if(IsNodeKeyEqualToTarget(*nodes.node, val.first)) {
+		return std::make_pair(nodes.node, false);
 	}
 	return std::nullopt;
 }
 
 
 template <typename Key, typename T>
-std::pair<std::shared_ptr<Node<Key, T>>, bool> insertAux(std::shared_ptr<Node<Key, T>> parent,
+std::pair<std::shared_ptr<Node<Key, T>>, bool> InsertAux(std::shared_ptr<Node<Key, T>> parent,
 									 					 const Nodes<Key, T>& nodes,
 								     					 const std::pair<const Key, T>& val) {
-	if(const auto newinsert = insertIfFinalNode(parent, nodes, val)) {
-		return *newinsert;
+	if(const auto newInsert = InsertIfFinalNode(parent, nodes, val)) {
+		return *newInsert;
 	}
-	std::pair<std::shared_ptr<Node<Key, T>>, bool> insertPair = std::make_pair(nullptr, false);
-	if(val.first < nodes.root->value.first) {
-		insertPair = insertAux(nodes.root, GetLeftNodes(nodes), val);
-		nodes.root->left = insertPair.first;
+	std::pair<std::shared_ptr<Node<Key, T>>, bool> InsertPair = std::make_pair(nullptr, false);
+	if(IsNodeKeyGreaterThanTarget(*nodes.node, val.first)) {
+		InsertPair = InsertAux(nodes.node, GetLeftNodes(nodes), val);
+		nodes.node->left = InsertPair.first;
 	}
-	if(val.first > nodes.root->value.first) {
-		insertPair = insertAux(nodes.root, GetRightNodes(nodes), val);
-		nodes.root->right = insertPair.first;
+	if(IsNodeKeyLessThanTarget(*nodes.node, val.first)) {
+		InsertPair = InsertAux(nodes.node, GetRightNodes(nodes), val);
+		nodes.node->right = InsertPair.first;
 	}
-	nodes.root->size = GetSizeBasedOnChildren(nodes);
-	return std::make_pair(nodes.root, insertPair.second);
+	nodes.node->size = GetSizeBasedOnChildren(nodes);
+	return std::make_pair(nodes.node, InsertPair.second);
 
 }
 
 template <typename Key, typename T>
 Nodes<Key, T> EraseWhenRightChildNull(const Nodes<Key, T>& nodes) {
-	if(!IsLeftNull(*nodes.root)) {
-		nodes.root->left->parent = nodes.root->parent;
+	if(!IsLeftNull(*nodes.node)) {
+		nodes.node->left->parent = nodes.node->parent;
 	}
-	if(IsParentLeftOfNode(*nodes.root)) {
-		nodes.root->parent->right = nodes.root->left;
+	if(IsParentLeftOfNode(*nodes.node)) {
+		nodes.node->parent->right = nodes.node->left;
 	}
-	if(IsParentRightOfNode(*nodes.root)) {
-		nodes.root->parent->left = nodes.root->left;
+	if(IsParentRightOfNode(*nodes.node)) {
+		nodes.node->parent->left = nodes.node->left;
 	}
 	return GetLeftNodes(nodes);
 }
 
 template <typename Key, typename T>
 Nodes<Key, T> EraseWhenLeftChildNull(const Nodes<Key, T>& nodes) {
-	if(!IsRightNull(*nodes.root)) {
-		nodes.root->right->parent = nodes.root->parent;
+	if(!IsRightNull(*nodes.node)) {
+		nodes.node->right->parent = nodes.node->parent;
 	}
-	if(IsParentLeftOfNode(*nodes.root)) {
-		nodes.root->parent->right = nodes.root->right;
+	if(IsParentLeftOfNode(*nodes.node)) {
+		nodes.node->parent->right = nodes.node->right;
 	}
-	if(IsParentRightOfNode(*nodes.root)) {
-		nodes.root->parent->left = nodes.root->right;
+	if(IsParentRightOfNode(*nodes.node)) {
+		nodes.node->parent->left = nodes.node->right;
 	}
 	return GetRightNodes(nodes);
 }
 
 template <typename Key, typename T>
-Nodes<Key, T> eraseAux(const Nodes<Key, T>& nodes, const Key& key);
+Nodes<Key, T> EraseAux(const Nodes<Key, T>& nodes, const Key& key);
 
 template <typename Key, typename T>
 Nodes<Key, T> ReplaceEraseByMinOnRight(const Nodes<Key, T>& nodes) {
-	auto minVal = (MinOfCurrentTree(GetRightNodes(nodes)).root)->value;
+	auto minVal = (MinOfCurrentTree(GetRightNodes(nodes)).node)->value;
 	auto successorPair = std::pair<const Key, T>(minVal.first, minVal.second);
-	auto treeNoSuccessor = eraseAux(nodes, successorPair.first); 
-	auto newNode = std::make_shared<Node<Key, T>>(successorPair, treeNoSuccessor.root->size, treeNoSuccessor.root->parent, treeNoSuccessor.root->left, treeNoSuccessor.root->right);
+	auto treeNoSuccessor = EraseAux(nodes, successorPair.first); 
+	auto newNode = std::make_shared<Node<Key, T>>(successorPair, treeNoSuccessor.node->size, treeNoSuccessor.node->parent, treeNoSuccessor.node->left, treeNoSuccessor.node->right);
 	PointNodeRelativesToItself(newNode);
 	return Nodes<Key, T>(newNode, nodes.beforeMin, nodes.afterMax);
 }
 
 template <typename Key, typename T>
 Nodes<Key, T> ReplaceEraseByMaxOnLeft(const Nodes<Key, T>& nodes) {
-	auto maxVal = (MaxOfCurrentTree(GetLeftNodes(nodes)).root)->value;
+	auto maxVal = (MaxOfCurrentTree(GetLeftNodes(nodes)).node)->value;
 	auto successorPair = std::pair<const Key, T>(maxVal);
-	auto treeNoSuccessor = eraseAux(nodes, successorPair.first);
-	auto newNode = std::make_shared<Node<Key, T>>(successorPair, treeNoSuccessor.root->size, treeNoSuccessor.root->parent, treeNoSuccessor.root->left, treeNoSuccessor.root->right);
+	auto treeNoSuccessor = EraseAux(nodes, successorPair.first);
+	auto newNode = std::make_shared<Node<Key, T>>(successorPair, treeNoSuccessor.node->size, treeNoSuccessor.node->parent, treeNoSuccessor.node->left, treeNoSuccessor.node->right);
 	PointNodeRelativesToItself(newNode);
 	return Nodes<Key, T>(newNode, treeNoSuccessor.beforeMin, treeNoSuccessor.afterMax);
 }
@@ -140,7 +140,7 @@ Nodes<Key, T> EraseRoot(const Nodes<Key, T>& nodes) {
 template <typename Key, typename T>
 Nodes<Key, T> EraseWhenOneChildIsNull(const Nodes<Key, T>& nodes) {
 		// check the size
-	if(IsRightNull(*nodes.root)) {
+	if(IsRightNull(*nodes.node)) {
 		return EraseWhenRightChildNull(nodes);
 	}
 	return EraseWhenLeftChildNull(nodes);
@@ -151,7 +151,7 @@ Nodes<Key, T> EraseCurrentNode(const Nodes<Key, T>& nodes) {
 	if(IsTreeAtTheRoot(nodes)) {
 		return EraseRoot(nodes);
 	}
-	if(IsRightNull(*nodes.root) || IsLeftNull(*nodes.root)) {
+	if(IsRightNull(*nodes.node) || IsLeftNull(*nodes.node)) {
 		return EraseWhenOneChildIsNull(nodes);
 	}
 	if(IsRightGreater(nodes)) {
@@ -164,19 +164,18 @@ Nodes<Key, T> EraseCurrentNode(const Nodes<Key, T>& nodes) {
 }
 
 template <typename Key, typename T>
-Nodes<Key, T> eraseAux(const Nodes<Key, T>& nodes, const Key& key) {
+Nodes<Key, T> EraseAux(const Nodes<Key, T>& nodes, const Key& key) {
 	// missing: update the size
 	assert(DoesRootHaveKey(nodes));
-	auto nodeKey = nodes.root->value.first;
-	if(nodeKey == key) {
+	if(IsNodeKeyEqualToTarget(*nodes.node, key)) {
 		return EraseCurrentNode(nodes);
 	}
 	auto nodesNew = nodes;
-	if(nodeKey < key) {
-		auto rightNodes = eraseAux(GetRightNodes(nodes), key);
+	if(IsNodeKeyLessThanTarget(*nodes.node, key)) {
+		auto rightNodes = EraseAux(GetRightNodes(nodes), key);
 		return UpdateRightNodes(nodes, rightNodes);
 	}
-	auto leftNodes = eraseAux(GetLeftNodes(nodes), key);
+	auto leftNodes = EraseAux(GetLeftNodes(nodes), key);
 	return UpdateLeftNodes(nodes, leftNodes);
 }
 
@@ -185,11 +184,11 @@ int RankAux(const Nodes<Key, T>& nodes, const Key& targetKey) {
 	if(!DoesRootHaveKey(nodes)) {
 		return 0;
 	}
-	if(nodes.root->value.first == targetKey) {
-		return GetSizeOfLeftSubTree(*nodes.root);
+	if(IsNodeKeyEqualToTarget(*nodes.node, targetKey)) {
+		return GetSizeOfLeftSubTree(*nodes.node);
 	}
-	if(nodes.root->value.first < targetKey) {
-		return 1 + GetSizeOfLeftSubTree(*nodes.root) + RankAux(GetRightNodes(nodes), targetKey); 
+	if(IsNodeKeyLessThanTarget(*nodes.node, targetKey)) {
+		return 1 + GetSizeOfLeftSubTree(*nodes.node) + RankAux(GetRightNodes(nodes), targetKey); 
 	}
 	return RankAux(GetLeftNodes(nodes), targetKey);
 }
@@ -200,115 +199,81 @@ template <typename Key, typename T>
 class BinarySearchTree {
 public:
 	using iterator = BinarySearchTreeIt<Key, T>;
-	using const_iterator = BinarySearchTreeIt<Key, const T>;
 	using value_type = std::pair<const  Key, T>;
 	BinarySearchTree() = default;
 	BinarySearchTree(const BinarySearchTree&);
 	BinarySearchTree(BinarySearchTree&&);
 	BinarySearchTree&operator=(const BinarySearchTree&) = delete;
 	BinarySearchTree&operator=(BinarySearchTree&&) = delete;
-	iterator find(const Key& key); // see how to get const_iterator
-	std::pair<iterator, bool> insert(const value_type& val);
-	iterator erase(iterator pos);
-	bool empty() const;
+	iterator Find(const Key& key) const; // see how to get const_iterator
+	std::pair<iterator, bool> Insert(const value_type& val);
+	iterator Erase(iterator pos);
+	bool Empty() const;
 	int Rank(const Key& targetKey) const;
-	const_iterator begin() const;
-	const_iterator end() const;
-	const_iterator cbegin() const;
-	const_iterator cend() const;
-	iterator begin();
-	iterator end();
+	iterator Begin() const;
+	iterator End() const;
 
 private:
-	Nodes<Key, T> m_nodes;
+	Nodes<Key, T> m_nodesAtRoot;
 };
 
 template <typename Key, typename T>
-bool BinarySearchTree<Key, T>::empty() const {
-	return m_nodes.root == nullptr;
+bool BinarySearchTree<Key, T>::Empty() const {
+	return m_nodesAtRoot.node == nullptr;
 }
 
 template<typename Key, typename T>
-typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::find(const Key& key) {
-	auto findNode = findAux(m_nodes, key);
-	return iterator(Nodes<Key, T>(findNode, m_nodes.beforeMin, m_nodes.afterMax));
+typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::Find(const Key& key) const {
+	auto FindNode = FindAux(m_nodesAtRoot, key);
+	return iterator(Nodes<Key, T>(FindNode, m_nodesAtRoot.beforeMin, m_nodesAtRoot.afterMax));
 
 }
 
 template<typename Key, typename T>
-std::pair<typename BinarySearchTree<Key, T>::iterator, bool> BinarySearchTree<Key, T>::insert(const value_type& val) {
-	if(empty()) {
-		m_nodes.root = CreateANewTree(val, m_nodes.beforeMin, m_nodes.afterMax);
-		m_nodes.beforeMin->parent = m_nodes.root;
-		m_nodes.afterMax->parent = m_nodes.root;
-		return std::make_pair(find(val.first), true);
+std::pair<typename BinarySearchTree<Key, T>::iterator, bool> BinarySearchTree<Key, T>::Insert(const value_type& val) {
+	if(Empty()) {
+		m_nodesAtRoot.node = CreateANewTree(val, m_nodesAtRoot.beforeMin, m_nodesAtRoot.afterMax);
+		m_nodesAtRoot.beforeMin->parent = m_nodesAtRoot.node;
+		m_nodesAtRoot.afterMax->parent = m_nodesAtRoot.node;
+		return std::make_pair(Find(val.first), true);
 	}
-	auto insertPair = insertAux(m_nodes.root->parent, m_nodes, val);
-	return std::make_pair(find(val.first), insertPair.second);
+	auto InsertPair = InsertAux(m_nodesAtRoot.node->parent, m_nodesAtRoot, val);
+	return std::make_pair(Find(val.first), InsertPair.second);
 
 }
 
 template<typename Key, typename T>
-typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::erase(iterator pos) {
-	if(pos == end()) {
-		return end();
+typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::Erase(iterator pos) {
+	if(pos == End()) {
+		return End();
 	}
 	auto key = pos->first;
-	auto findNode = findAux(m_nodes, key);
+	auto FindNode = FindAux(m_nodesAtRoot, key);
 	std::optional<Key> nextKey;
-	auto itNext = ++iterator(Nodes<Key, T>(findNode, m_nodes.beforeMin, m_nodes.afterMax));
-	if(itNext != end()) {
+	auto itNext = ++iterator(Nodes<Key, T>(FindNode, m_nodesAtRoot.beforeMin, m_nodesAtRoot.afterMax));
+	if(itNext != End()) {
 		nextKey = itNext->first;
 	}
-	m_nodes = eraseAux(m_nodes, key);
-	auto findnext = find(*nextKey);
-	return nextKey ? findnext : end();
+	m_nodesAtRoot = EraseAux(m_nodesAtRoot, key);
+	auto Findnext = Find(*nextKey);
+	return nextKey ? Findnext : End();
 }
 
 //Rank -> how many keys < target key?
 template<typename Key, typename T>
 int BinarySearchTree<Key, T>::Rank(const Key& targetKey) const {
-	return RankAux(m_nodes, targetKey);
+	return RankAux(m_nodesAtRoot, targetKey);
 }
 
 template <typename Key, typename T>
-typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::begin() {
-	if(empty()) {
-		return end();
+typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::Begin() const {
+	if(Empty()) {
+		return End();
 	}
-	return iterator(Min(m_nodes));
+	return iterator(Min(m_nodesAtRoot));
 }
 
 template <typename Key, typename T>
-typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::end() {
-	return iterator(GetAfterMaxNodes(m_nodes));
+typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::End() const {
+	return iterator(GetAfterMaxNodes(m_nodesAtRoot));
 }
-
-template <typename Key, typename T>
-typename BinarySearchTree<Key, T>::const_iterator BinarySearchTree<Key, T>::begin() const {
-	return const_iterator((const_cast<BinarySearchTree<Key, T>&>(*this).begin()));
-}
-
-template <typename Key, typename T>
-typename BinarySearchTree<Key, T>::const_iterator BinarySearchTree<Key, T>::end() const {
-	return const_iterator((const_cast<BinarySearchTree<Key, T>&>(*this).end()));
-}
-
-
-template <typename Key, typename T>
-typename BinarySearchTree<Key, T>::const_iterator BinarySearchTree<Key, T>::cbegin() const {
-	return begin();
-}
-
-template <typename Key, typename T>
-typename BinarySearchTree<Key, T>::const_iterator BinarySearchTree<Key, T>::cend() const {
-	return end();
-}
-
-/* copy constructors need to be defined */
-/*
-To do - have non-const and a const version of find
-To do iterator - const/non const versions
-To do - progress with ordered op: mix, max, ceiling, floor, iteration?
-copy control
-*/

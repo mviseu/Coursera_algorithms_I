@@ -15,6 +15,22 @@ struct Node {
 	std::shared_ptr<Node<Key, T>> right = nullptr;
 };
 
+
+template <typename Key, typename T>
+bool IsNodeKeyLessThanTarget(const Node<Key, T>& node, const Key& targetKey) {
+	return node.value.first < targetKey;
+}
+
+template <typename Key, typename T>
+bool IsNodeKeyGreaterThanTarget(const Node<Key, T>& node, const Key& targetKey) {
+	return node.value.first > targetKey;
+}
+
+template <typename Key, typename T>
+bool IsNodeKeyEqualToTarget(const Node<Key, T>& node, const Key& targetKey) {
+	return !IsNodeKeyLessThanTarget(node, targetKey) && !IsNodeKeyGreaterThanTarget(node, targetKey);
+}
+
 template <typename Key, typename T>
 bool IsParentLeftOfNode(const Node<Key, T>& node) {
 	if(!node.parent) {
