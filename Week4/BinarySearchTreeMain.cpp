@@ -16,6 +16,12 @@ void ReportAllRanks(const BinarySearchTree<std::string, int>& map) {
 	}
 }
 
+void ReportReverseRanks(const BinarySearchTree<std::string, int>& map) {
+	for(auto revIt = map.RBegin(); revIt != map.REnd(); ++revIt) {
+		std::cout << "Reverse rank is: " << map.Rank(revIt->first) << std::endl;
+	}
+}
+
 int main() {
 	BinarySearchTree<std::string, int> dict;
 	InsertNewPair(dict, "Hello", 33);
@@ -26,6 +32,9 @@ int main() {
 	InsertNewPair(dict, "a", 33);
 
 	ReportAllRanks(dict);
+	std::cout << "Reverse" << std::endl;
+	ReportReverseRanks(dict);
+	
 	dict.Erase(dict.Find("Hello"));
 	ReportAllRanks(dict);
 

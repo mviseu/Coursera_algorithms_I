@@ -6,6 +6,7 @@
 #include <memory>
 #include <utility>
 #include <iostream>
+#include <iterator>
 #include <optional>
 
 namespace {
@@ -199,6 +200,7 @@ template <typename Key, typename T>
 class BinarySearchTree {
 public:
 	using iterator = BinarySearchTreeIt<Key, T>;
+	using reverse_iterator = std::reverse_iterator<iterator>;
 	using value_type = std::pair<const  Key, T>;
 	BinarySearchTree() = default;
 	BinarySearchTree(const BinarySearchTree&);
@@ -212,6 +214,8 @@ public:
 	int Rank(const Key& targetKey) const;
 	iterator Begin() const;
 	iterator End() const;
+	reverse_iterator RBegin() const;
+	reverse_iterator REnd() const;
 
 private:
 	Nodes<Key, T> m_nodesAtRoot;
@@ -276,4 +280,14 @@ typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::Begin() co
 template <typename Key, typename T>
 typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::End() const {
 	return iterator(GetAfterMaxNodes(m_nodesAtRoot));
+}
+
+template <typename Key, typename T>
+typename BinarySearchTree<Key, T>::reverse_iterator BinarySearchTree<Key, T>::RBegin() const {
+	return std::reverse_iterator<iterator>(End());
+}
+
+template <typename Key, typename T>
+typename BinarySearchTree<Key, T>::reverse_iterator BinarySearchTree<Key, T>::REnd() const {
+	return std::reverse_iterator<iterator>(Begin());
 }
