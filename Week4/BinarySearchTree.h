@@ -203,8 +203,8 @@ public:
 	using reverse_iterator = std::reverse_iterator<iterator>;
 	using value_type = std::pair<const  Key, T>;
 	BinarySearchTree() = default;
-	BinarySearchTree(const BinarySearchTree&);
-	BinarySearchTree(BinarySearchTree&&);
+	BinarySearchTree(const BinarySearchTree&) = delete;
+	BinarySearchTree(BinarySearchTree&&) = delete;
 	BinarySearchTree&operator=(const BinarySearchTree&) = delete;
 	BinarySearchTree&operator=(BinarySearchTree&&) = delete;
 	iterator Find(const Key& key) const; // see how to get const_iterator
