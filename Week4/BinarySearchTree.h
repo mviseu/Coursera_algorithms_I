@@ -2,6 +2,7 @@
 #include "BinarySearchNode.h"
 #include "BinarySearchNodes.h"
 #include "BinarySearchTreeIt.h"
+#include "Range.h"
 #include <functional>
 #include <memory>
 #include <utility>
@@ -194,6 +195,25 @@ int RankAux(const Nodes<Key, T>& nodes, const Key& targetKey) {
 	return RankAux(GetLeftNodes(nodes), targetKey);
 }
 
+
+template <typename Key, typename T>
+std::vector<Key> RangeSearchAux(const Nodes<Key, T>& nodes, const Range<Key>& rg, const std::vector<Key>& inRange) {
+	auto ret = inRange;
+	if(DoesRootHaveKey(nodes)) {
+		const auto key = nodes.node->value.first;
+		if(IsKeyGreaterLow(key, rg)) {
+			ret = RangeSearchAux(GetLeftNodes(nodes), rg, ret);
+		}
+		if(IsKeyInRange(key, rg)) {
+			ret.push_back(key);	
+		}
+		if(IsKeyLessHigh(key, rg)) {
+			ret = RangeSearchAux(GetRightNodes(nodes), rg, ret);
+		}
+	}
+	return ret;
+}
+
 } // namespace
 
 template <typename Key, typename T>
@@ -213,7 +233,8 @@ public:
 	bool Empty() const;
 	bool Contains(const Key& key) const;
 	int Rank(const Key& targetKey) const;
-	int RangeCount(const Key& lo, const Key& hi) const;
+	int RangeCount(const Range<Key>& rg) const;
+	std::vector<Key> RangeSearch(const Range<Key>& rg) const;
 	iterator Begin() const;
 	iterator End() const;
 	reverse_iterator RBegin() const;
@@ -278,12 +299,17 @@ bool BinarySearchTree<Key, T>::Contains(const Key& key) const {
 
 //Range Count -> how many keys between loKey and highKey?
 template<typename Key, typename T>
-int BinarySearchTree<Key, T>::RangeCount(const Key& lo, const Key& hi) const {
-	int rangeCount = Rank(hi) - Rank(lo);
-	if(Contains(hi)) {
+int BinarySearchTree<Key, T>::RangeCount(const Range<Key>& rg) const {
+	int rangeCount = Rank(rg.hi) - Rank(rg.lo);
+	if(Contains(rg.hi)) {
 		++rangeCount;
 	}
 	return rangeCount;
+}
+
+template<typename Key, typename T>
+std::vector<Key> BinarySearchTree<Key, T>::RangeSearch(const Range<Key>& rg) const {
+	return RangeSearchAux(m_nodesAtRoot, rg, std::vector<Key>());
 }
 
 template <typename Key, typename T>
