@@ -22,6 +22,11 @@ void ReportReverseRanks(const BinarySearchTree<std::string, int>& map) {
 	}
 }
 
+void ReportRangeCount(const std::string& lo, const std::string& hi, const BinarySearchTree<std::string, int>& mp) {
+	std::cout << "Range between " << lo << " and " 
+			  << hi << " is: " << mp.RangeCount(lo, hi) << std::endl;
+}
+
 int main() {
 	BinarySearchTree<std::string, int> dict;
 	InsertNewPair(dict, "Hello", 33);
@@ -30,6 +35,13 @@ int main() {
 	InsertNewPair(dict, "is", 55);
 	InsertNewPair(dict, "x", 6);
 	InsertNewPair(dict, "a", 33);
+
+	ReportRangeCount("Hello", "is", dict);
+	ReportRangeCount("Hallo", "is", dict);
+	ReportRangeCount("Hello", "isnt", dict);
+	ReportRangeCount("Hallo", "isnt", dict);
+	ReportRangeCount("A", "z", dict);
+
 
 	ReportAllRanks(dict);
 	std::cout << "Reverse" << std::endl;
@@ -52,6 +64,7 @@ int main() {
 
 	dict.Erase(dict.Find("x"));
 	ReportAllRanks(dict);
+
 
 	return 0;
 }

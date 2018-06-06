@@ -211,7 +211,9 @@ public:
 	std::pair<iterator, bool> Insert(const value_type& val);
 	iterator Erase(iterator pos);
 	bool Empty() const;
+	bool Contains(const Key& key) const;
 	int Rank(const Key& targetKey) const;
+	int RangeCount(const Key& lo, const Key& hi) const;
 	iterator Begin() const;
 	iterator End() const;
 	reverse_iterator RBegin() const;
@@ -267,6 +269,21 @@ typename BinarySearchTree<Key, T>::iterator BinarySearchTree<Key, T>::Erase(iter
 template<typename Key, typename T>
 int BinarySearchTree<Key, T>::Rank(const Key& targetKey) const {
 	return RankAux(m_nodesAtRoot, targetKey);
+}
+
+template<typename Key, typename T>
+bool BinarySearchTree<Key, T>::Contains(const Key& key) const {
+	return Find(key) != End();
+}
+
+//Range Count -> how many keys between loKey and highKey?
+template<typename Key, typename T>
+int BinarySearchTree<Key, T>::RangeCount(const Key& lo, const Key& hi) const {
+	int rangeCount = Rank(hi) - Rank(lo);
+	if(Contains(hi)) {
+		++rangeCount;
+	}
+	return rangeCount;
 }
 
 template <typename Key, typename T>
