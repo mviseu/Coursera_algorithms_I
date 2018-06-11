@@ -1,14 +1,14 @@
 #pragma once
 #include <algorithm>
 #include <iterator>
-
+#include <iostream>
 
 constexpr int k = 2;
 
 struct Node {
 	Node(int (&pt)[k], Node* lft = nullptr, Node* rt = nullptr)
 	: left(lft), right(rt) {
-		std::copy(std::begin(pt), std::end(pt), std::begin(pt));
+		std::copy(std::begin(pt), std::end(pt), std::begin(point));
 	}
 	int point[k] = {0};
 	Node* left = nullptr;
@@ -17,27 +17,50 @@ struct Node {
 
 namespace {
 
-bool IsPointToAddLess(int pointAlreadyTree[], int pointToAdd[], int axisToDivide) {
-	return pointToAdd[axisToDivide] < pointAlreadyTree[axisToDivide];
+bool IsTargetPointLess(int pointAlreadyTree[], int targetPoint[], int axisToDivide) {
+	return targetPoint[axisToDivide] < pointAlreadyTree[axisToDivide];
 }
 
-bool IsPointToAddGreater(int pointAlreadyTree[], int pointToAdd[], int axisToDivide) {
-	return IsPointToAddLess(pointToAdd, pointAlreadyTree, axisToDivide);
+bool IsTargetPointGreater(int pointAlreadyTree[], int targetPoint[], int axisToDivide) {
+	return IsTargetPointLess(targetPoint, pointAlreadyTree, axisToDivide);
+}
+
+int GetAxisToDivide(int depth) {
+	return depth % k;
 }
 
 Node* InsertRec(Node* node, int (&pointToAdd)[k], int depth) { 
 	if(node == nullptr) {
 		return new Node(pointToAdd);
 	}
-	const auto axisToDivide = depth % k;
+	const auto axisToDivide = GetAxisToDivide(depth);
 	const auto increasedDepth = depth + 1; 
-	if(IsPointToAddLess(node->point, pointToAdd, axisToDivide)) {
-		return InsertRec(node->left, pointToAdd, increasedDepth);
+	if(IsTargetPointLess(node->point, pointToAdd, axisToDivide)) {
+		node->left = InsertRec(node->left, pointToAdd, increasedDepth);
 	}
-	if(IsPointToAddGreater(node->point, pointToAdd, axisToDivide)) {
-		return InsertRec(node->right, pointToAdd, increasedDepth);
+	if(IsTargetPointGreater(node->point, pointToAdd, axisToDivide)) {
+		node->right = InsertRec(node->right, pointToAdd, increasedDepth);
 	}
 	return node;
+}
+
+bool AreTwoPointsEqual(int (&point1)[k], int (&point2)[k]) {
+	return std::equal(std::begin(point1), std::end(point1), std::begin(point2));
+}
+
+bool SearchRec(Node* node, int (&pointToSearch)[k], int depth) {
+	if(node == nullptr) {
+		return false;
+	}
+	if(AreTwoPointsEqual(node->point, pointToSearch)) {
+		return true;
+	}
+	const auto axis = GetAxisToDivide(depth);
+	const auto increasedDepth = depth + 1;
+	if(IsTargetPointLess(node->point, pointToSearch, axis)) {
+		return SearchRec(node->left, pointToSearch, increasedDepth);
+	}
+	return SearchRec(node->right, pointToSearch, increasedDepth);
 }
 
 } // namespace
@@ -46,6 +69,7 @@ struct KdTree {
 public:
 	KdTree() = default;
 	void Insert(int (&point)[k]);
+	bool Search(int (&point)[k]) const;
 
 private:
 	Node* m_root = nullptr;
@@ -54,4 +78,8 @@ private:
 
 void KdTree::Insert(int (&point)[k]) {
 	m_root = InsertRec(m_root, point, 0);
+}
+
+bool KdTree::Search(int (&point)[k]) const {
+	return SearchRec(m_root, point, 0);
 }
