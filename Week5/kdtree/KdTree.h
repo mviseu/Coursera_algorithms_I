@@ -1,7 +1,9 @@
 #pragma once
 #include <algorithm>
+#include <cassert>
 #include <iterator>
 #include <iostream>
+#include <optional>
 
 constexpr int k = 2;
 
@@ -17,8 +19,10 @@ struct Node {
 
 namespace {
 
-bool IsTargetPointLess(int pointAlreadyTree[], int targetPoint[], int axisToDivide) {
-	return targetPoint[axisToDivide] < pointAlreadyTree[axisToDivide];
+Node* FindMinRec(Node* node, int depth, int depthMinDimension);
+
+bool IsFirstLess(int first[], int second[], int axisToDivide) {
+	return first[axisToDivide] < second[axisToDivide];
 }
 
 int GetAxisToDivide(int depth) {
@@ -31,7 +35,7 @@ Node* InsertRec(Node* node, int (&pointToAdd)[k], int depth) {
 	}
 	const auto axisToDivide = GetAxisToDivide(depth);
 	const auto increasedDepth = depth + 1; 
-	if(IsTargetPointLess(node->point, pointToAdd, axisToDivide)) {
+	if(IsFirstLess(pointToAdd, node->point, axisToDivide)) {
 		node->left = InsertRec(node->left, pointToAdd, increasedDepth);
 	} else {
 		node->right = InsertRec(node->right, pointToAdd, increasedDepth);
@@ -56,28 +60,49 @@ bool IsAxisSameAsAxisOfMin(int depth, int depthMinDimension) {
 	return GetAxisToDivide(depth) == GetAxisToDivide(depthMinDimension);
 }
 
-*Node FindMinWhenAxisCurrSameAsAxisMin(Node* node, int depth, int depthMinDimension) {
-	if(IsLeftChildPopulated(*node)) {
-		return FindMin(node->left, depth + 1, depthMinDimension);
-	} else {
-		return node;
-	}	
+Node* GetMinNode(Node* first, Node* second, int axisDivide) {
+	assert(first != nullptr);
+	assert(second != nullptr);
+	if(IsFirstLess(first->point, second->point, axisDivide)) {
+		return first;
+	}
+	return second;
 }
 
-*Node FindMin(Node* node, int depth, int depthMinDimension) {
+Node* FindMinWhenAxisCurrSameAsAxisMin(Node* node, int depth, int depthMinDimension) {
+	if(IsLeftChildPopulated(*node)) {
+		return FindMinRec(node->left, depth + 1, depthMinDimension);
+	} else {
+		return node;
+	}
+}
+
+Node* FindMinWhenAxisCurrDiffAxisMin(Node* node, int depth, int depthMinDimension) {
+	auto min = node;
+	const auto depthIncreased = depth + 1;
+	if(IsLeftChildPopulated(*node)) {
+		const auto minLeft = FindMinRec(node->left, depthIncreased, depthMinDimension);
+		min = GetMinNode(min, minLeft, depthMinDimension); 
+	}
+	if(IsRightChildPopulated(*node)) {
+		const auto minRight = FindMinRec(node->right, depthIncreased, depthMinDimension);
+		min = GetMinNode(min, minRight, depthMinDimension);
+	}
+	return min;
+}
+
+Node* FindMinRec(Node* node, int depth, int depthMinDimension) {
 	assert(node != nullptr);
 	if(IsAxisSameAsAxisOfMin(depth, depthMinDimension)) {
 		return FindMinWhenAxisCurrSameAsAxisMin(node, depth, depthMinDimension);
 	} else {
-		// if left null, look to right
-		// if right null, look to left
-		// if both null, return current
-		// if both populated choose min of current, right, left
+		return FindMinWhenAxisCurrDiffAxisMin(node, depth, depthMinDimension);
 	}
 }
 
 
-*Node DeleteCurrentNode(Node* node, int depth) {
+/*
+Node* DeleteCurrentNode(Node* node, int depth) {
 	if(IsRightChildPopulated(*node)) {
 		// delete when right child populated only or both populated
 		// find the successor point (min on right)
@@ -109,14 +134,14 @@ Node* DeleteRec(Node* node, int (&pointToDel)[k], int depth) {
 	}
 	const auto axis = GetAxisToDivide(depth);
 	const auto increasedDepth = depth + 1;
-	if(IsTargetPointLess(node->point, pointToDel, axis)) {
+	if(IsFirstLess(pointToDel, node->point, axis)) {
 		node->left = DeleteRec(node->left, pointToDel, increasedDepth);
 	} else {
 		node->right = DeleteRec(node->right, pointToDel, increasedDepth);
 	}
 	return node;
 }
-
+*/
 
 bool SearchRec(Node* node, int (&pointToSearch)[k], int depth) {
 	if(node == nullptr) {
@@ -127,7 +152,7 @@ bool SearchRec(Node* node, int (&pointToSearch)[k], int depth) {
 	}
 	const auto axis = GetAxisToDivide(depth);
 	const auto increasedDepth = depth + 1;
-	if(IsTargetPointLess(node->point, pointToSearch, axis)) {
+	if(IsFirstLess(pointToSearch, node->point, axis)) {
 		return SearchRec(node->left, pointToSearch, increasedDepth);
 	}
 	return SearchRec(node->right, pointToSearch, increasedDepth);
@@ -139,7 +164,8 @@ struct KdTree {
 public:
 	KdTree() = default;
 	void Insert(int (&point)[k]);
-	void Delete(int (&point)[k]);
+	//void Delete(int (&point)[k]);
+	std::optional<int*> FindMin() const;
 	bool Search(int (&point)[k]) const;
 
 private:
@@ -151,8 +177,17 @@ void KdTree::Insert(int (&point)[k]) {
 	m_root = InsertRec(m_root, point, 0);
 }
 
+/*
 void KdTree::Delete(int (&point)[k]) {
 	m_root = DeleteRec(m_root, point, 0);
+}
+*/
+
+std::optional<int*> KdTree::FindMin() const {
+	if(m_root == nullptr) {
+		return std::nullopt;
+	}
+	return FindMinRec(m_root, 0, 0)->point;
 }
 
 bool KdTree::Search(int (&point)[k]) const {

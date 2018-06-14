@@ -10,6 +10,16 @@ void CheckIfPointInTree(const KdTree& tree, int (&point)[2]) {
 	}
 }
 
+void ReportMin(const KdTree& tree) {
+	if(const auto min = tree.FindMin()) {
+		std::cout << "Minimum was found in tree. x is: "
+				  << (*min)[0] << " and y is: "
+				  << (*min)[1] << std::endl; 
+	} else {
+		std::cout << "Minimum does not exist." << std::endl;
+	}
+}
+
 int main() {
 	KdTree tree;
 	int right[2] = {1, 0};
@@ -26,5 +36,6 @@ int main() {
 	CheckIfPointInTree(tree, up);
 	CheckIfPointInTree(tree, outside);
 	CheckIfPointInTree(tree, down);
+	ReportMin(tree);
 	return 0;
 }
