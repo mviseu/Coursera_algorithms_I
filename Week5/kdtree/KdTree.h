@@ -20,6 +20,7 @@ struct Node {
 namespace {
 
 Node* FindMinRec(Node* node, int depth, int depthMinDimension);
+Node* DeleteRec(Node* node, int (&pointToDel)[k], int depth);
 
 bool IsFirstLess(int first[], int second[], int axisToDivide) {
 	return first[axisToDivide] < second[axisToDivide];
@@ -100,25 +101,34 @@ Node* FindMinRec(Node* node, int depth, int depthMinDimension) {
 	}
 }
 
+void ReplacePointWithSuccessor(Node& node, const Node& min) {
+	std::copy(std::begin(min.point), std::end(min.point), std::begin(node.point));	
+}
 
-/*
+Node* ReplaceWithSuccessorByRightDelete(Node* node, int depth) {
+	auto min = FindMinRec(node->right, depth + 1, depth);
+	ReplacePointWithSuccessor(*node, *min);
+	node->right = DeleteRec(node->right, min->point, depth + 1);
+	return node;
+}
+
+
+Node* ReplaceWithSuccessorByLeftDelete(Node* node, int depth) {
+	assert(node->right == nullptr);
+	auto min = FindMinRec(node->left, depth + 1, depth);
+	ReplacePointWithSuccessor(*node, *min);
+	node->right = DeleteRec(node->left, min->point, depth + 1);
+	node->left = nullptr;
+	return node;
+}
+
 Node* DeleteCurrentNode(Node* node, int depth) {
 	if(IsRightChildPopulated(*node)) {
-		// delete when right child populated only or both populated
-		// find the successor point (min on right)
-		// delete successor on right
-		// replace node to be deleted with successor
-
-		
+		return ReplaceWithSuccessorByRightDelete(node, depth);
 	} else {
 		if(IsLeftChildPopulated(*node)) {
-			// delete when left child populated only
-			// find successor which is the min on the left side
-			// delete successor on left
-			// replace node to be deleted with sucessor
-			// append remaining lhs tree on right of the successor
+			return ReplaceWithSuccessorByLeftDelete(node, depth);
 		} else {
-			// delete when no child populated
 			delete node;
 			return nullptr;
 		}
@@ -141,7 +151,7 @@ Node* DeleteRec(Node* node, int (&pointToDel)[k], int depth) {
 	}
 	return node;
 }
-*/
+
 
 bool SearchRec(Node* node, int (&pointToSearch)[k], int depth) {
 	if(node == nullptr) {
@@ -164,7 +174,7 @@ struct KdTree {
 public:
 	KdTree() = default;
 	void Insert(int (&point)[k]);
-	//void Delete(int (&point)[k]);
+	void Delete(int (&point)[k]);
 	std::optional<int*> FindMin() const;
 	bool Search(int (&point)[k]) const;
 
@@ -177,11 +187,11 @@ void KdTree::Insert(int (&point)[k]) {
 	m_root = InsertRec(m_root, point, 0);
 }
 
-/*
+
 void KdTree::Delete(int (&point)[k]) {
 	m_root = DeleteRec(m_root, point, 0);
 }
-*/
+
 
 std::optional<int*> KdTree::FindMin() const {
 	if(m_root == nullptr) {

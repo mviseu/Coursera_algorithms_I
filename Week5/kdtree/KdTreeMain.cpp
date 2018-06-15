@@ -20,6 +20,17 @@ void ReportMin(const KdTree& tree) {
 	}
 }
 
+void ReportDelete(int (&point)[2]) {
+	std::cout << "Deleted point with x: " << point[0] << " and y: " << point[1] << std::endl;	
+}
+
+void DeleteEvent(KdTree& tree, int (&point)[2]) {
+	CheckIfPointInTree(tree, point);
+	tree.Delete(point);
+	ReportDelete(point);
+	CheckIfPointInTree(tree, point);
+}
+
 int main() {
 	KdTree tree;
 	int right[2] = {1, 0};
@@ -37,5 +48,11 @@ int main() {
 	CheckIfPointInTree(tree, outside);
 	CheckIfPointInTree(tree, down);
 	ReportMin(tree);
+
+
+	DeleteEvent(tree, left);
+	DeleteEvent(tree, right);
+	DeleteEvent(tree, up);
+	DeleteEvent(tree, down);
 	return 0;
 }
