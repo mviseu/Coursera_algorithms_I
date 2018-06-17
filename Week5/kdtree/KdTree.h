@@ -8,6 +8,7 @@
 #include <vector>
 
 constexpr int k = 2;
+using Point = int*;
 
 namespace {
 
@@ -194,31 +195,39 @@ bool SearchRec(Node* node, int (&pointToSearch)[k], int depth) {
 	return SearchRec(node->right, pointToSearch, increasedDepth);
 }
 
-/*
-bool IsNodeInRange(const Node& node, const std::pair<int [k], int[k]>& bounds, int axisDiv) {
-	return !IsFirstLess(node.point, bounds.first, axisDiv) && !IsFirstLess(bounds.second, node.point, axisDiv);
+
+bool IsNodeInRangeForDim(const Node& node, int (&lower)[k], int (&upper)[k], int axisDiv) {
+	return (!IsFirstLess(node.point, lower, axisDiv)) && (!IsFirstLess(upper, node.point, axisDiv));
 }
-*/
-/*
-void SearchRangeRec(std::vector<int [k]>& inBounds, Node* node, const std::pair<int [k], int[k]>& bounds, int depth) {
+
+bool IsNodeInRange(const Node& node, int (&lower)[k], int (&upper)[k]) {
+	for(auto i = 0; i < k; ++i) {
+		if(!IsNodeInRangeForDim(node, lower, upper, i)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+int SearchRangeRec(Point* inBounds, Node* node, int (&lower)[k], int (&upper)[k], int depth, int nrMatches) {
 	if(node == nullptr) {
-		return;
+		return nrMatches;
 	}
 	const auto axisDiv = GetAxisToDivide(depth);
-	if(IsNodeInRange(*node, bounds, axisDiv)) {
-		int newPoint[k] = {0};
-		std::copy(std::begin(node->point), std::end(node->point), std::begin(newPoint));
-		inBounds.push_back(newPoint);
-	}
 	const auto depthIncrease = depth + 1;
-	if(IsFirstLess(node->point, bounds.first, axisDiv)) {
-		SearchRangeRec(inBounds, node->right, bounds, depthIncrease);
+	if(IsFirstLess(node->point, upper, axisDiv)) {
+		nrMatches = SearchRangeRec(&inBounds[0], node->right, lower, upper, depthIncrease, nrMatches);
 	}
-	if(IsFirstLess(bounds.second, node->point, axisDiv)) {
-		SearchRangeRec(inBounds, node->left, bounds, depthIncrease);
+	if(IsNodeInRange(*node, lower, upper)) {
+		CopyToPoint(&inBounds[nrMatches][0], node->point);
+		++nrMatches;
 	}
+	if(IsFirstLess(lower, node->point, axisDiv)) {
+		nrMatches = SearchRangeRec(&inBounds[0], node->left, lower, upper, depthIncrease, nrMatches);
+	}
+	return nrMatches;
 }
-*/
+
 
 } // namespace
 
@@ -229,7 +238,7 @@ public:
 	void Delete(int (&point)[k]);
 	std::optional<int*> FindMin() const;
 	bool Search(int (&point)[k]) const;
-	//std::vector<int [k]> SearchRange(const std::pair<int [k], int[k]>&) const;
+	int SearchRange(Point* inBounds, int (&lower)[k], int (&upper)[k]) const;
 
 private:
 	Node* m_root = nullptr;
@@ -256,10 +265,8 @@ std::optional<int*> KdTree::FindMin() const {
 bool KdTree::Search(int (&point)[k]) const {
 	return SearchRec(m_root, point, 0);
 }
-/*
-std::vector<int [k]> KdTree::SearchRange(const std::pair<int [k], int[k]>& bounds) const {
-	std::vector<int [k]> inBounds;
-	SearchRangeRec(inBounds, m_root, bounds, 0);
-	return inBounds;
 
-*/
+int KdTree::SearchRange(Point* inBounds, int (&lower)[k], int (&upper)[k]) const {
+	const auto matches = SearchRangeRec(&(inBounds[0]), m_root, lower, upper, 0, 0);
+	return matches;
+}
