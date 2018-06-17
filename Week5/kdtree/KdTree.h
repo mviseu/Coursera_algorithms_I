@@ -4,15 +4,34 @@
 #include <iterator>
 #include <iostream>
 #include <optional>
+#include <utility>
+#include <vector>
 
 constexpr int k = 2;
 
+namespace {
+
+void CopyToPoint(int* point, const int* base) {
+	for(auto i = 0; i < k; ++i) {
+		point[i] = base[i];
+	}
+}
+
+int* CreatePoint(const int* base) {
+	int* newPoint = new int[k]();
+	CopyToPoint(newPoint, base);
+	return newPoint;
+}
+
+} // namespace
+
 struct Node {
 	Node(int (&pt)[k], Node* lft = nullptr, Node* rt = nullptr)
-	: left(lft), right(rt) {
-		std::copy(std::begin(pt), std::end(pt), std::begin(point));
+	: point(CreatePoint(pt)), left(lft), right(rt) {}
+	~Node() {
+		delete [] point;
 	}
-	int point[k] = {0};
+	int* point = nullptr;
 	Node* left = nullptr;
 	Node* right = nullptr;
 };
@@ -20,9 +39,9 @@ struct Node {
 namespace {
 
 Node* FindMinRec(Node* node, int depth, int depthMinDimension);
-Node* DeleteRec(Node* node, int (&pointToDel)[k], int depth);
+Node* DeleteRec(Node* node, int pointToDel[k], int depth);
 
-bool IsFirstLess(int first[], int second[], int axisToDivide) {
+bool IsFirstLess(const int first[], const int second[], int axisToDivide) {
 	return first[axisToDivide] < second[axisToDivide];
 }
 
@@ -44,8 +63,15 @@ Node* InsertRec(Node* node, int (&pointToAdd)[k], int depth) {
 	return node;
 }
 
-bool AreTwoPointsEqual(int (&point1)[k], int (&point2)[k]) {
-	return std::equal(std::begin(point1), std::end(point1), std::begin(point2));
+bool AreTwoPointsEqual(const int point1[k], const int point2[k]) {
+	auto equal = true;
+	for(auto i = 0; i < k; ++i) {
+		if(point1[i] != point2[i]) {
+			equal = false;
+			break;
+		}
+	}
+	return equal;
 }
 
 bool IsRightChildPopulated(const Node& node) {
@@ -102,7 +128,7 @@ Node* FindMinRec(Node* node, int depth, int depthMinDimension) {
 }
 
 void ReplacePointWithSuccessor(Node& node, const Node& min) {
-	std::copy(std::begin(min.point), std::end(min.point), std::begin(node.point));	
+	CopyToPoint(node.point, min.point);
 }
 
 Node* ReplaceWithSuccessorByRightDelete(Node* node, int depth) {
@@ -135,7 +161,7 @@ Node* DeleteCurrentNode(Node* node, int depth) {
 	}
 }
 
-Node* DeleteRec(Node* node, int (&pointToDel)[k], int depth) {
+Node* DeleteRec(Node* node, int pointToDel[k], int depth) {
 	if(node == nullptr) {
 		return node;
 	}
@@ -168,6 +194,32 @@ bool SearchRec(Node* node, int (&pointToSearch)[k], int depth) {
 	return SearchRec(node->right, pointToSearch, increasedDepth);
 }
 
+/*
+bool IsNodeInRange(const Node& node, const std::pair<int [k], int[k]>& bounds, int axisDiv) {
+	return !IsFirstLess(node.point, bounds.first, axisDiv) && !IsFirstLess(bounds.second, node.point, axisDiv);
+}
+*/
+/*
+void SearchRangeRec(std::vector<int [k]>& inBounds, Node* node, const std::pair<int [k], int[k]>& bounds, int depth) {
+	if(node == nullptr) {
+		return;
+	}
+	const auto axisDiv = GetAxisToDivide(depth);
+	if(IsNodeInRange(*node, bounds, axisDiv)) {
+		int newPoint[k] = {0};
+		std::copy(std::begin(node->point), std::end(node->point), std::begin(newPoint));
+		inBounds.push_back(newPoint);
+	}
+	const auto depthIncrease = depth + 1;
+	if(IsFirstLess(node->point, bounds.first, axisDiv)) {
+		SearchRangeRec(inBounds, node->right, bounds, depthIncrease);
+	}
+	if(IsFirstLess(bounds.second, node->point, axisDiv)) {
+		SearchRangeRec(inBounds, node->left, bounds, depthIncrease);
+	}
+}
+*/
+
 } // namespace
 
 struct KdTree {
@@ -177,6 +229,7 @@ public:
 	void Delete(int (&point)[k]);
 	std::optional<int*> FindMin() const;
 	bool Search(int (&point)[k]) const;
+	//std::vector<int [k]> SearchRange(const std::pair<int [k], int[k]>&) const;
 
 private:
 	Node* m_root = nullptr;
@@ -203,3 +256,10 @@ std::optional<int*> KdTree::FindMin() const {
 bool KdTree::Search(int (&point)[k]) const {
 	return SearchRec(m_root, point, 0);
 }
+/*
+std::vector<int [k]> KdTree::SearchRange(const std::pair<int [k], int[k]>& bounds) const {
+	std::vector<int [k]> inBounds;
+	SearchRangeRec(inBounds, m_root, bounds, 0);
+	return inBounds;
+
+*/
