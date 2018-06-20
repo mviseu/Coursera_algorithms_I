@@ -40,19 +40,26 @@ void ReportRangeSearch(int matches, int** res) {
 
 }
 
+void ReportClosestPoint(const KdTree& tree, const int (&target) [2]) {
+	auto closestPoint = tree.ClosestPoint(target);
+	std::cout << "Closest has x: " << closestPoint[0] << " and y: "
+			  << closestPoint[1] << std::endl;
+	delete [] closestPoint;
+}
+
 int main() {
 	KdTree tree;
-	int extraOutside1[2] = {4, 2};
-	int right[2] = {1, 0};
-	int left[2] = {-1, 0};
-	int extraOutside2[2] = {-1, 3};
-	int up[2] = {0, 1};
-	int down[2] = {0, -1};
+	//int extraOutside1[2] = {4, 2};
+	int right[2] = {2, 0};
+	int left[2] = {-2, 0};
+	//int extraOutside2[2] = {-1, 3};
+	int up[2] = {0, 2};
+	int down[2] = {0, -2};
 	int outside[2] = {-3, 3};
-	tree.Insert(extraOutside1);
+	//tree.Insert(extraOutside1);
 	tree.Insert(right);
 	tree.Insert(left);
-	tree.Insert(extraOutside2);
+	//tree.Insert(extraOutside2);
 	tree.Insert(up);
 	tree.Insert(down);
 	tree.Insert(outside);
@@ -69,16 +76,24 @@ int main() {
 	DeleteEvent(tree, up);
 	DeleteEvent(tree, down);
 	*/
+	/*
 	int lowBound[2] = {-2, -2};
 	int upBound[2] = {2, 2};
 	const auto maxSize = 4000;
 	int** container = new int*[maxSize];
 	for(auto index = 0; index < maxSize; ++index) {
 		container[index] = new int[2](); 
-	}
+	}const KdTree& tree
 
 	auto nrMatches = tree.SearchRange(&container[0], lowBound, upBound);
 	std::cout << nrMatches << std::endl;
 	ReportRangeSearch(nrMatches, &container[0]);
+	for(auto index = 0; index < maxSize; ++index) {
+		delete [] container[index]; 
+	}
+	delete [] container;
+	*/
+	int target[k] = {0, -1};
+	ReportClosestPoint(tree, target);
 	return 0;
 }

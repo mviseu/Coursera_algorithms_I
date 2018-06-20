@@ -1,8 +1,10 @@
 #pragma once
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <iterator>
 #include <iostream>
+#include <numeric>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -41,6 +43,7 @@ namespace {
 
 Node* FindMinRec(Node* node, int depth, int depthMinDimension);
 Node* DeleteRec(Node* node, int pointToDel[k], int depth);
+int* ClosestPointRec(Node* node, const int (&target)[k], int* closestSoFar, int depth);
 
 bool IsFirstLess(const int first[], const int second[], int axisToDivide) {
 	return first[axisToDivide] < second[axisToDivide];
@@ -228,6 +231,73 @@ int SearchRangeRec(Point* inBounds, Node* node, int (&lower)[k], int (&upper)[k]
 	return nrMatches;
 }
 
+bool IsLikelyClosestLeft(const Node& node, const int (&target)[k], int axisDiv) {
+	return node.left != nullptr && IsFirstLess(target, node.point, axisDiv);
+}
+
+bool IsLikelyClosestRight(const Node& node, const int (&target)[k], int axisDiv) {
+	return node.right != nullptr && !IsFirstLess(target, node.point, axisDiv);
+}
+
+double GetDistanceBetweenPoints(const int* point1, const int* point2) {
+	int diffSquares[k] = {0};
+	for(auto i = 0; i < k; ++i) {
+		diffSquares[i] = std::pow(point1[i] - point2[i], 2); 
+	}
+	return std::sqrt(std::accumulate(std::begin(diffSquares), std::end(diffSquares), 0));
+}
+
+int* PickClosest(const int (&target)[k], int* point1, int* point2) {
+	if(GetDistanceBetweenPoints(target, point1) < GetDistanceBetweenPoints(target, point2)) {
+		return point1;
+	} else {
+		return point2;
+	}
+}
+
+int* PickClosest(Node* childNode, const int (&target)[k], int* closestSoFar, int depthOfChild) {
+	closestSoFar = PickClosest(target, childNode->point, closestSoFar);
+	return ClosestPointRec(childNode, target, closestSoFar, depthOfChild);
+}
+
+bool CanLessLikelySideStillBeCloser(const int (&target)[k], const int* point, const int* closestSoFar, int axisDiv) {
+	const auto distanceClosest = GetDistanceBetweenPoints(target, closestSoFar);
+	const auto orthogonalDistAxis = std::abs(target[axisDiv] - point[axisDiv]); 
+	return orthogonalDistAxis < distanceClosest;
+}
+
+bool CanRightSideStillBeCloser(const Node& node, const int (&target)[k], const int* closestSoFar, int axisDiv) {
+	if(node.right == nullptr) {
+		return false;
+	}
+	return CanLessLikelySideStillBeCloser(target, node.point, closestSoFar, axisDiv);
+}
+
+bool CanLeftSideStillBeCloser(const Node& node, const int (&target)[k], const int* closestSoFar, int axisDiv) {
+	if(node.left == nullptr) {
+		return false;
+	} 
+	return CanLessLikelySideStillBeCloser(target, node.point, closestSoFar, axisDiv);
+}
+
+int* ClosestPointRec(Node* node, const int (&target)[k], int* closestSoFar, int depth) {
+	assert(node != nullptr);
+	const auto axisDiv = GetAxisToDivide(depth);
+	const auto increasedDepth = depth + 1;
+	if(IsLikelyClosestLeft(*node, target, axisDiv)) {
+		closestSoFar = PickClosest(node->left, target, closestSoFar, increasedDepth);
+		if(CanRightSideStillBeCloser(*node, target, closestSoFar, axisDiv)) {
+			closestSoFar = PickClosest(node->right, target, closestSoFar, increasedDepth);
+		}
+	}
+	if(IsLikelyClosestRight(*node, target, axisDiv)) {
+		closestSoFar = PickClosest(node->right, target, closestSoFar, increasedDepth);
+		if(CanLeftSideStillBeCloser(*node, target, closestSoFar, axisDiv)) {
+			closestSoFar = PickClosest(node->left, target, closestSoFar, increasedDepth);
+		}
+	}
+	return closestSoFar;
+}
 
 } // namespace
 
@@ -239,6 +309,7 @@ public:
 	std::optional<int*> FindMin() const;
 	bool Search(int (&point)[k]) const;
 	int SearchRange(Point* inBounds, int (&lower)[k], int (&upper)[k]) const;
+	int* ClosestPoint(const int (&target)[k]) const;
 
 private:
 	Node* m_root = nullptr;
@@ -264,6 +335,13 @@ std::optional<int*> KdTree::FindMin() const {
 
 bool KdTree::Search(int (&point)[k]) const {
 	return SearchRec(m_root, point, 0);
+}
+
+int* KdTree::ClosestPoint(const int (&target)[k]) const {
+	if(m_root == nullptr) {
+		return nullptr;
+	}
+	return CreatePoint(ClosestPointRec(m_root, target, m_root->point, 0));
 }
 
 int KdTree::SearchRange(Point* inBounds, int (&lower)[k], int (&upper)[k]) const {
