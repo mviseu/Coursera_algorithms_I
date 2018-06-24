@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <iostream>
 #include <memory>
 #include <utility>
 
@@ -11,6 +12,8 @@ struct Interval {
 
 bool operator==(const Interval& lhs, const Interval& rhs);
 bool operator!=(const Interval& lhs, const Interval& rhs);
+std::ostream& operator<<(std::ostream& os, const Interval& interv);
+
 bool StartsBefore(const Interval& lhs, const Interval& rhs);
 int GetMaxEndPoint(const Interval& lhs, const Interval& rhs);
 
@@ -25,6 +28,7 @@ struct Node {
 
 class IntervalTree {
 public:
+	bool Find(const Interval& interv) const;
 	void Delete(const Interval& interv);
 	void Insert(const Interval& interv);
 private:

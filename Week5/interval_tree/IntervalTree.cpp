@@ -14,6 +14,11 @@ bool StartsBefore(const Interval& lhs, const Interval& rhs) {
 	return lhs.lo < rhs.lo;
 }
 
+std::ostream& operator<<(std::ostream& os, const Interval& interv) {
+	os << "(" << interv.lo << ", " << interv.hi << ")";
+	return os;
+}
+
 namespace {
 std::unique_ptr<Node> DeleteRec(std::unique_ptr<Node> root, const Interval& interv);
 
@@ -111,6 +116,22 @@ std::unique_ptr<Node> DeleteRec(std::unique_ptr<Node> root, const Interval& inte
 	return root;
 }
 
+bool FindRec(const Node& node, const Interval& interv) {
+	if(node.interval == interv) {
+		return true;
+	}
+	if(NodeHasNoChildren(node)) {
+		return false;
+	}
+	if(node.left && StartsBefore(interv, node.interval)) {
+		return FindRec(*node.left, interv);
+	}
+	if(node.right && !StartsBefore(interv, node.interval)) {
+		return FindRec(*node.right, interv);
+	}
+	return false;
+}
+
 } // namespace
 
 void IntervalTree::Insert(const Interval& interv) {
@@ -119,4 +140,11 @@ void IntervalTree::Insert(const Interval& interv) {
 
 void IntervalTree::Delete(const Interval& interv) {
 	m_root = DeleteRec(std::move(m_root), interv);
+}
+
+bool IntervalTree::Find(const Interval& interv) const {
+	if(m_root == nullptr) {
+		return false;
+	}
+	return FindRec(*m_root, interv);
 }
