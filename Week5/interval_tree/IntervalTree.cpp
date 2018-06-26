@@ -1,5 +1,6 @@
 #include "IntervalTree.h"
 #include <algorithm>
+#include <iterator>
 
 bool operator==(const Interval& lhs, const Interval& rhs) {
 	return lhs.lo == rhs.lo && lhs.hi == rhs.hi;
