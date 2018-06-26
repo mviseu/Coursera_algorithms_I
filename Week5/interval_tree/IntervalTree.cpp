@@ -1,6 +1,5 @@
 #include "IntervalTree.h"
 #include <algorithm>
-#include <vector>
 
 bool operator==(const Interval& lhs, const Interval& rhs) {
 	return lhs.lo == rhs.lo && lhs.hi == rhs.hi;
@@ -132,6 +131,34 @@ bool FindRec(const Node& node, const Interval& interv) {
 	return false;
 }
 
+bool DoAllLeftIntervalsEndBeforeLo(const Node& node, int lo) {
+	return node.maxEndPoint < lo;
+}
+
+bool DoAllRightIntervalsStartAfterHi(const Node& node, int hi) {
+	return node.interval.lo > hi;
+}
+
+bool IsValueInRange(int val, const Interval& interv) {
+	return val >= interv.lo && val <= interv.hi;
+}
+
+bool IsIntervalInRange(const Node& node, const Interval& interv) {
+	return IsValueInRange(node.interval.lo, interv) || IsValueInRange(node.interval.hi, interv);
+}
+
+void AllOverlappingIntervalsRec(const Node& node, const Interval& interv, std::vector<Interval>& overlaps) {
+	if(node.left != nullptr && !DoAllLeftIntervalsEndBeforeLo(*node.left, interv.lo)) {
+		AllOverlappingIntervalsRec(*node.left, interv, overlaps);
+	}
+	if(IsIntervalInRange(node, interv)) {
+		overlaps.push_back(node.interval);
+	}
+	if(node.right != nullptr && !DoAllRightIntervalsStartAfterHi(node, interv.hi)) {
+		AllOverlappingIntervalsRec(*node.right, interv, overlaps);
+	}
+}
+
 } // namespace
 
 void IntervalTree::Insert(const Interval& interv) {
@@ -147,4 +174,13 @@ bool IntervalTree::Find(const Interval& interv) const {
 		return false;
 	}
 	return FindRec(*m_root, interv);
+}
+
+std::vector<Interval> IntervalTree::AllOverlappingIntervals(const Interval& interv) const {
+	std::vector<Interval> overlaps;
+	if(m_root == nullptr) {
+		return overlaps;
+	}
+	AllOverlappingIntervalsRec(*m_root, interv, overlaps);
+	return overlaps;
 }

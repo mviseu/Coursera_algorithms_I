@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <utility>
+#include <vector>
 
 struct Interval {
 	Interval(int low, int high) : lo(low), hi(high) {}
@@ -31,6 +32,7 @@ public:
 	bool Find(const Interval& interv) const;
 	void Delete(const Interval& interv);
 	void Insert(const Interval& interv);
+	std::vector<Interval> AllOverlappingIntervals(const Interval& interv) const;
 private:
 	std::unique_ptr<Node> m_root = nullptr;
 };

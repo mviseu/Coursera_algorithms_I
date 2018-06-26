@@ -10,34 +10,22 @@ void ReportValueInTree(const IntervalTree& tree, const Interval& val) {
 }
 
 int main() {
-	Interval i1(0, 3);
-	Interval i2(1, 2);
-	Interval i4(-1, 2);
-	Interval i3(2, 2);
-	Interval i5(-2, 2);
+	Interval i1(17, 19);
+	Interval i2(7, 10);
+	Interval i4(15, 18);
+	Interval i3(4, 8);
+	Interval i5(21, 24);
+	Interval i6(5, 8);
 	IntervalTree tree;
 	tree.Insert(i1);
 	tree.Insert(i2);
 	tree.Insert(i3);
 	tree.Insert(i4);
 	tree.Insert(i5);
+	tree.Insert(i5);
+	for(const auto& overlap : tree.AllOverlappingIntervals(Interval(9, 16))) {
+		std::cout << "Interval " << overlap << " overlaps" << std::endl;
+	}
 
-	ReportValueInTree(tree, i1);
-	ReportValueInTree(tree, i2);
-	ReportValueInTree(tree, i3);
-	ReportValueInTree(tree, i4);
-	ReportValueInTree(tree, i5);
-
-	tree.Delete(i1);
-	//tree.Delete(i2);
-	//tree.Delete(i3);
-	//tree.Delete(i4);
-	//tree.Delete(i5);
-
-	ReportValueInTree(tree, i1);
-	ReportValueInTree(tree, i2);
-	ReportValueInTree(tree, i3);
-	ReportValueInTree(tree, i4);
-	ReportValueInTree(tree, i5);
 	return 0;
 }
