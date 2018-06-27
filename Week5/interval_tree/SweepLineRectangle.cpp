@@ -23,7 +23,7 @@ bool IsThisStartEvent(const Event& event) {
 }
 
 bool EventOrderByX(const Event& lhs, const Event& rhs) {
-	return lhs.x < rhs.x;
+	return rhs.x < lhs.x;
 }
 
 std::array<Event, 2> ExtractEvents(const Rectangle& rectangle) {
