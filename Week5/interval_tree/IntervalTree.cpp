@@ -144,15 +144,19 @@ bool IsValueInRange(int val, const Interval& interv) {
 	return val >= interv.lo && val <= interv.hi;
 }
 
-bool IsIntervalInRange(const Node& node, const Interval& interv) {
-	return IsValueInRange(node.interval.lo, interv) || IsValueInRange(node.interval.hi, interv);
+bool IsIntervalInsideRange(const Interval& interval1, const Interval& interval2) {
+	return IsValueInRange(interval1.lo, interval2) || IsValueInRange(interval1.hi, interval2);
+}
+
+bool IsThereAnOverlap(const Interval& interval1, const Interval& interval2) {
+	return IsIntervalInsideRange(interval1, interval2) || IsIntervalInsideRange(interval2, interval1);
 }
 
 void AllOverlappingIntervalsRec(const Node& node, const Interval& interv, std::vector<Interval>& overlaps) {
 	if(node.left != nullptr && !DoAllLeftIntervalsEndBeforeLo(*node.left, interv.lo)) {
 		AllOverlappingIntervalsRec(*node.left, interv, overlaps);
 	}
-	if(IsIntervalInRange(node, interv)) {
+	if(IsThereAnOverlap(interv, node.interval)) {
 		overlaps.push_back(node.interval);
 	}
 	if(node.right != nullptr && !DoAllRightIntervalsStartAfterHi(node, interv.hi)) {

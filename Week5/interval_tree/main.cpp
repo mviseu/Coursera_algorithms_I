@@ -21,28 +21,18 @@ int main() {
 	const Rectangle r1(Interval(-3, 3), Interval(0, 2));
 	const Rectangle r2(Interval(-2, -1), Interval(0, 1));
 	const Rectangle r3(Interval(2, 3), Interval(4, 5));
-	for(const auto& intersection : SweepLineRectangle({r1, r2, r3})) {
+	const Rectangle r4(Interval(6, 9), Interval(6, 9));
+	const Rectangle r5(Interval(7, 8), Interval(7, 8));
+
+	const Rectangle r6(Interval(10, 14), Interval(10, 11));
+	const Rectangle r7(Interval(11, 15), Interval(12, 3));
+	const Rectangle r8(Interval(12, 13), Interval(0, 20));	
+
+	for(const auto& intersection : SweepLineRectangle({r1, r2, r3, r4, r5, r6, r7, r8})) {
 		std::cout << "Intersections found for starting point x: " << intersection.x
 				  << " and for Intervals: " << std::endl;
 		PrintIntervals(intersection.yy);	
 	}
+	
 	return 0;
 }
-
-/*
-Examples to be included
-
-CASE 1
-Rectangle1: xx: -3, 3, y: 0 2
-
-Intersects:
-xx: -2, -1 yy: 0 , 1
-
-Does not intersect:
-xx
-2, 3 yy: 4, 5
-
-Expected: 1 intersection with x = -2 and y between 0, 2
-
-
-*/
