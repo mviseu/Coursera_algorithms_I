@@ -1,4 +1,5 @@
 #pragma once
+#include "Optional.h"
 #include <assert.h>
 #include <memory>
 #include <utility>
@@ -58,13 +59,13 @@ std::unique_ptr<Node<Key, Value>> ColourFlip(std::unique_ptr<Node<Key, Value>> t
 }
 
 template<typename Key, typename Value>
-bool IsTargetLess(const Node<Key, Value>& node, const std::pair<Key, Value>& val) {
-	return val.first < node.keyVal.first;
+bool IsTargetLess(const Node<Key, Value>& node, const Key& key) {
+	return key < node.keyVal.first;
 }
 
 template<typename Key, typename Value>
-bool IsTargetSame(const Node<Key, Value>& node, const std::pair<Key, Value>& val) {
-	return node.keyVal.first == val.first;
+bool IsTargetSame(const Node<Key, Value>& node, const Key& key) {
+	return node.keyVal.first == key;
 }
 
 template<typename Key, typename Value>
@@ -82,12 +83,15 @@ std::unique_ptr<Node<Key, Value>> InsertRec(std::unique_ptr<Node<Key, Value>> no
 	if(nodePtr == nullptr) {
 		return std::make_unique<Node<Key, Value>>(val, nullptr, nullptr, Colour::red);
 	}
-	if(IsTargetSame(*nodePtr, val)) {
+	if(IsTargetSame(*nodePtr, val.first)) {
 		return nodePtr;
 	}
-	if(IsTargetLess(*nodePtr, val)) {
+	if(IsTargetLess(*nodePtr, val.first)) {
 		nodePtr->left = InsertRec(std::move(nodePtr->left), val);
+	} else {
+		nodePtr->right = InsertRec(std::move(nodePtr->right), val);
 	}
+
 	assert(nodePtr != nullptr);
 	if(IsRightRed(*nodePtr) && !IsLeftRed(*nodePtr)) {
 		nodePtr = LeftRotation(std::move(nodePtr));
@@ -101,12 +105,43 @@ std::unique_ptr<Node<Key, Value>> InsertRec(std::unique_ptr<Node<Key, Value>> no
 	return nodePtr;
 }
 
+template <typename Key, typename Value>
+Optional<std::pair<Key, Value>> FindRec(const Node<Key, Value>& node, const Key& key) {
+	if(IsTargetSame(node, key)) {
+		return node.keyVal;
+	}
+	if(IsTargetLess(node, key)) {
+		if(node.left != nullptr) {
+			return FindRec(*node.left, key);
+		}
+	} else {
+		if(node.right != nullptr) {
+			return FindRec(*node.right, key);
+		}
+	}
+	return nullopt;
+}
+template <typename Key, typename Value>
+void PrintAllRec(const Node<Key, Value>& node) {
+	if(node.left) {
+		std::cout << node.left->keyVal.first << std::endl;
+		PrintAllRec(*node.left);
+	}
+	if(node.right) {
+		std::cout << node.right->keyVal.first << std::endl;
+		PrintAllRec(*node.right);
+	}
+
+}
+
 } // namespace
 
 template <typename Key, typename Value>
 class RedBlackTree {
 public:
 	void Insert(const std::pair<Key, Value>& val);
+	Optional<std::pair<Key, Value>> Find(const Key& key) const;
+	void PrintAll() const;
 private:
 	std::unique_ptr<Node<Key, Value>> m_root;
 };
@@ -119,4 +154,21 @@ void RedBlackTree<Key, Value>::Insert(const std::pair<Key, Value>& val) {
 		m_root = InsertRec(std::move(m_root), val);
 		m_root->colour = Colour::black;
 	}
+}
+
+template <typename Key, typename Value>
+Optional<std::pair<Key, Value>> RedBlackTree<Key, Value>::Find(const Key& key) const {
+	if(m_root == nullptr) {
+		return nullopt;
+	}
+	return FindRec(*m_root, key);
+}
+
+template <typename Key, typename Value>
+void RedBlackTree<Key, Value>::PrintAll() const {
+	if(m_root == nullptr) {
+		return;
+	}
+	std::cout << m_root->keyVal.first << std::endl;
+	PrintAllRec(*m_root);
 }

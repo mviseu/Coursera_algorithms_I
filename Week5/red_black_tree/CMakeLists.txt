@@ -4,5 +4,6 @@ project(RedBlackTree)
 
 add_executable(red_black_tree
   main.cpp
+  Optional.h
   RedBlackTree.h
 )
