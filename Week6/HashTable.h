@@ -14,7 +14,7 @@ namespace {
 template <typename Key>
 int GetHashIndex(const Key& key, int nrBuckets) {
 	return std::hash<Key>()(key) % nrBuckets;
-} // namespace
+}
 
 template <typename Key, typename Value>
 Node<Key, Value>** CreateNewValue(const Key& key, const Value& val, Node<Key, Value>** buckets, int nrBuckets) {
@@ -23,15 +23,51 @@ Node<Key, Value>** CreateNewValue(const Key& key, const Value& val, Node<Key, Va
 	return buckets;
 }
 
-}; 
+template<typename Key, typename Value>
+bool IsKeyInList(const Key& key, const Node<Key, Value>& node) {
+	auto nodePtr = &node;
+	while(nodePtr != nullptr) {
+		if(nodePtr->key == key) {
+			return true;
+		}
+		nodePtr = nodePtr->next;
+	}
+	return false;
+}
+
+
+template<typename Key, typename Value>
+Node<Key, Value>* EraseIfKeyInList(const Key& key, Node<Key, Value>* node) {
+	if(node == nullptr) {
+		return node;
+	}
+	if(node->key == key) {
+		auto nodeToDel = node;
+		node = node->next;
+		delete nodeToDel;
+		return node;
+	}
+	auto currNode = node;
+	for(auto nextNode = currNode->next; nextNode != nullptr; nextNode = nextNode->next) {
+		if(nextNode->key == key) {
+			currNode->next = nextNode->next;
+			delete nextNode;
+			return node;
+		}
+		currNode = nextNode;
+	}
+	return node;
+}
+
+}  // namespace
 
 template <typename Key, typename Value>
 class HashTable {
 public:
 	HashTable() = default;
 	void Insert(const Key& key, const Value& val);
-	//void Erase(const Key& key);
-	//bool Contains(const Key& key) const;
+	void Erase(const Key& key);
+	bool Contains(const Key& key) const;
 	double LoadFactor() const;
 	bool Empty() const;
 private:
@@ -88,9 +124,25 @@ void HashTable<Key, Value>::Insert(const Key& key, const Value& val) {
 		if(m_size == 0) {
 			Rehash(1);
 		} else {
-			
 			Rehash(m_nrBuckets * 2);
 		}
 	}
 	AddNewValue(key, val);
+}
+
+template <typename Key, typename Value>
+bool HashTable<Key, Value>::Contains(const Key& key) const {
+	const auto bucket = GetHashIndex(key, m_nrBuckets);
+	if(m_buckets[bucket] != nullptr) {
+		return IsKeyInList(key, *m_buckets[bucket]);
+	}
+	return false;
+}
+
+
+template <typename Key, typename Value>
+void HashTable<Key, Value>::Erase(const Key& key) {
+	const auto bucket = GetHashIndex(key, m_nrBuckets);
+	m_buckets[bucket] = EraseIfKeyInList(key, m_buckets[bucket]);
+	--m_size;
 }
