@@ -41,7 +41,7 @@ int main() {
 
 
 
-	table.Erase("Hello53");
+	table.Erase("Hello2");
 
 	ReportKeyExistence(table, "Hello");
 	ReportKeyExistence(table, "Hello2");
@@ -58,5 +58,58 @@ int main() {
 	ReportKeyExistence(table, "Hellosfb");
 	ReportKeyExistence(table, "Hellosdg");
 	ReportKeyExistence(table, "Hello36");
+
+/*
+	HashTable<std::string, int> copyTable(table);
+	ReportKeyExistence(copyTable, "Hello");
+	ReportKeyExistence(copyTable, "Hello2");
+	ReportKeyExistence(copyTable, "Hello5");
+	ReportKeyExistence(copyTable, "Hello3");
+	ReportKeyExistence(copyTable, "Hellor");
+	ReportKeyExistence(copyTable, "Hellog");
+	ReportKeyExistence(copyTable, "Hellos");
+	ReportKeyExistence(copyTable, "Hellof ");
+	ReportKeyExistence(copyTable, "Hello22");
+	ReportKeyExistence(copyTable, "Hello53");
+	ReportKeyExistence(copyTable, "Hellosdf");
+	ReportKeyExistence(copyTable, "Hello35");
+	ReportKeyExistence(copyTable, "Hellosfb");
+	ReportKeyExistence(copyTable, "Hellosdg");
+	ReportKeyExistence(copyTable, "Hello36");
+
+
+	ReportKeyExistence(table, "Hello");
+	ReportKeyExistence(table, "Hello2");
+	ReportKeyExistence(table, "Hello5");
+	ReportKeyExistence(table, "Hello3");
+	ReportKeyExistence(table, "Hellor");
+	ReportKeyExistence(table, "Hellog");
+	ReportKeyExistence(table, "Hellos");
+	ReportKeyExistence(table, "Hellof ");
+	ReportKeyExistence(table, "Hello22");
+	ReportKeyExistence(table, "Hello53");
+	ReportKeyExistence(table, "Hellosdf");
+	ReportKeyExistence(table, "Hello35");
+	ReportKeyExistence(table, "Hellosfb");
+	ReportKeyExistence(table, "Hellosdg");
+	ReportKeyExistence(table, "Hello36");
+	*/
+	HashTable<std::string, int> moveTable(std::move(table));
+	std::cout << "Move table" << std::endl;
+	ReportKeyExistence(moveTable, "Hello");
+	ReportKeyExistence(moveTable, "Hello2");
+	ReportKeyExistence(moveTable, "Hello5");
+	ReportKeyExistence(moveTable, "Hello3");
+	ReportKeyExistence(moveTable, "Hellor");
+	ReportKeyExistence(moveTable, "Hellog");
+	ReportKeyExistence(moveTable, "Hellos");
+	ReportKeyExistence(moveTable, "Hellof ");
+	ReportKeyExistence(moveTable, "Hello22");
+	ReportKeyExistence(moveTable, "Hello53");
+	ReportKeyExistence(moveTable, "Hellosdf");
+	ReportKeyExistence(moveTable, "Hello35");
+	ReportKeyExistence(moveTable, "Hellosfb");
+	ReportKeyExistence(moveTable, "Hellosdg");
+	ReportKeyExistence(moveTable, "Hello36");
 	return 0;
 }

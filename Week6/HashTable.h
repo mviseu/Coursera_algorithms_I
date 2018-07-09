@@ -1,5 +1,5 @@
 #pragma once
-#include <utility>
+#include <functional>
 
 template <typename Key, typename Value>
 struct Node {
@@ -59,17 +59,31 @@ Node<Key, Value>* EraseIfKeyInList(const Key& key, Node<Key, Value>* node) {
 	return node;
 }
 
+template <typename Key, typename Value>
+Node<Key, Value>** CopyTable(Node<Key, Value>**tableToCopy, int nrBuckets) {
+	auto newTable = new Node<Key, Value>*[nrBuckets]();
+	for(auto b = 0; b < nrBuckets; ++b) {
+		for(auto p = tableToCopy[b]; p != nullptr; p = p->next) {
+			newTable[b] = new Node<Key, Value>(p->key, p->value, newTable[b]);
+		}
+	}
+	return newTable;
+}
+
 }  // namespace
 
 template <typename Key, typename Value>
 class HashTable {
 public:
 	HashTable() = default;
+	HashTable(const HashTable& rhs);
+	HashTable(HashTable&& rhs);
 	void Insert(const Key& key, const Value& val);
 	void Erase(const Key& key);
 	bool Contains(const Key& key) const;
 	double LoadFactor() const;
 	bool Empty() const;
+	~HashTable();
 private:
 	bool IsRehashRequired(int newSize) const;
 	void Rehash(int newNrBuckets);
@@ -79,6 +93,18 @@ private:
 	Node<Key, Value>** m_buckets = nullptr;
 	int m_maxLoadFactor = 5;
 };
+
+template <typename Key, typename Value>
+HashTable<Key, Value>::HashTable(const HashTable& rhs) : m_nrBuckets(rhs.m_nrBuckets), m_size(rhs.m_size), m_maxLoadFactor(rhs.m_maxLoadFactor) {
+	m_buckets = CopyTable(rhs.m_buckets, rhs.m_nrBuckets);
+}
+
+template <typename Key, typename Value>
+HashTable<Key, Value>::HashTable(HashTable&& rhs) : m_nrBuckets(rhs.m_nrBuckets), m_size(rhs.m_size), m_buckets(rhs.m_buckets), m_maxLoadFactor(rhs.m_maxLoadFactor) {
+	rhs.m_buckets = nullptr;
+	rhs.m_size = 0;
+	rhs.m_nrBuckets = 0;
+}
 
 template <typename Key, typename Value>
 bool HashTable<Key, Value>::Empty() const {
@@ -98,7 +124,7 @@ bool HashTable<Key, Value>::IsRehashRequired(int newSize) const {
 
 template <typename Key, typename Value>
 void HashTable<Key, Value>::Rehash(int newNrBuckets) {
-	Node<Key, Value>** newBuckets = new Node<Key, Value>*[newNrBuckets]({});
+	Node<Key, Value>** newBuckets = new Node<Key, Value>*[newNrBuckets]();
 	for(auto b = 0; b < m_nrBuckets; ++b) {
 		for(auto p = m_buckets[b]; p != nullptr; ) {
 			newBuckets = CreateNewValue(p->key, p->value, newBuckets, newNrBuckets);
@@ -145,4 +171,19 @@ void HashTable<Key, Value>::Erase(const Key& key) {
 	const auto bucket = GetHashIndex(key, m_nrBuckets);
 	m_buckets[bucket] = EraseIfKeyInList(key, m_buckets[bucket]);
 	--m_size;
+}
+
+
+template <typename Key, typename Value>
+HashTable<Key, Value>::~HashTable() {
+	for(auto b = 0; b < m_nrBuckets; ++b) {
+		for(auto p = m_buckets[b]; p != nullptr; ) {
+			auto currP = p;
+			p = p->next;
+			delete currP;
+		}
+	}
+	if(m_nrBuckets != 0) {
+		delete [] m_buckets;
+	}
 }
